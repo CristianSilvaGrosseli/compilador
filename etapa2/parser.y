@@ -50,9 +50,58 @@ parameter_list: type TK_IDENTIFICADOR
     |
     ;
 
+global_declaration: variable_declaration
+    ;
+
+local_declaration: variable_declaration
+    ;
+
+variable_declaration: type identifier_list ';'
+    ;
+
 type: TK_PR_INT
     | TK_PR_FLOAT
     | TK_PR_BOOL
+    ;
+
+identifier_list: TK_IDENTIFICADOR
+    | identifier_list ',' TK_IDENTIFICADOR
+    ;
+
+command_block: '{' command_list '}'
+    ;
+
+command_list: simple_command command_list
+    |
+    ;
+
+simple_command: local_declaration ';'
+    | assignment ';'
+    | function_call ';'
+    | return_command ';'
+    | conditional_if conditional_else ';'
+    | iteration ';'
+    | command_block ';'
+    ;
+
+assignment: TK_IDENTIFICADOR '=' expression
+    ;
+
+function_call: TK_IDENTIFICADOR '(' expression_list ')'
+    | TK_IDENTIFICADOR '(' ')'
+    ;
+
+return_command: TK_PR_RETURN expression
+    ;
+
+conditional_if: TK_PR_IF '(' expression ')' command_block
+    ;
+
+conditional_else: TK_PR_ELSE expression
+    |
+    ;
+
+iteration: TK_PR_WHILE '(' expression ')' command_block
     ;
 
 %%

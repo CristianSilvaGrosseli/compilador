@@ -10,6 +10,8 @@ int yylex(void);
 void yyerror (char const *mensagem);
 %}
 
+%define parse.trace
+
 %token TK_PR_INT
 %token TK_PR_FLOAT
 %token TK_PR_BOOL
@@ -102,6 +104,55 @@ conditional_else: TK_PR_ELSE expression
     ;
 
 iteration: TK_PR_WHILE '(' expression ')' command_block
+    ;
+
+expression_list: expression
+    | expression_list ',' expression
+    ;
+
+expression: precedence_6
+    | expression TK_OC_OR precedence_6
+    ;
+
+precedence_6: precedence_5
+    | precedence_6 TK_OC_AND precedence_5
+    ;
+
+precedence_5: precedence_4
+    | precedence_5 TK_OC_EQ precedence_4
+    | precedence_5 TK_OC_NE precedence_4
+    ;
+
+precedence_4: precedence_3
+    | precedence_4 '<' precedence_3
+    | precedence_4 '>' precedence_3
+    | precedence_4 TK_OC_LE precedence_3
+    | precedence_4 TK_OC_GE precedence_3
+    ;
+
+precedence_3: precedence_2
+    | precedence_3 '+' precedence_2
+    | precedence_3 '-' precedence_2
+    ;
+
+precedence_2: precedence_1
+    | precedence_2 '*' precedence_1
+    | precedence_2 '/' precedence_1
+    | precedence_2 '%' precedence_1
+    ;
+
+precedence_1: '(' expression ')'
+    | '!' precedence_1
+    | '-' precedence_1
+    | TK_IDENTIFICADOR
+    | literal
+    | function_call
+    ;
+
+literal: TK_LIT_INT
+    | TK_LIT_FLOAT
+    | TK_LIT_FALSE
+    | TK_LIT_TRUE
     ;
 
 %%

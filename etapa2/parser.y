@@ -10,8 +10,6 @@ int yylex(void);
 void yyerror (char const *mensagem);
 %}
 
-%define parse.trace
-
 %token TK_PR_INT
 %token TK_PR_FLOAT
 %token TK_PR_BOOL
@@ -31,6 +29,8 @@ void yyerror (char const *mensagem);
 %token TK_LIT_FALSE
 %token TK_LIT_TRUE
 %token TK_ERRO
+
+%start program;
 
 %%
 
@@ -52,13 +52,13 @@ parameter_list: type TK_IDENTIFICADOR
     |
     ;
 
-global_declaration: variable_declaration
+global_declaration: variable_declaration ';'
     ;
 
 local_declaration: variable_declaration
     ;
 
-variable_declaration: type identifier_list ';'
+variable_declaration: type identifier_list
     ;
 
 type: TK_PR_INT
@@ -99,7 +99,7 @@ return_command: TK_PR_RETURN expression
 conditional_if: TK_PR_IF '(' expression ')' command_block
     ;
 
-conditional_else: TK_PR_ELSE expression
+conditional_else: TK_PR_ELSE command_block
     |
     ;
 

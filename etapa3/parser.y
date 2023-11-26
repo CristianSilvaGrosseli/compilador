@@ -19,49 +19,122 @@ int get_line_number();
 	asd_tree_t* nodo;
 }
 
-%token<lexical_value_t> TK_PR_INT
-%token<lexical_value_t> TK_PR_FLOAT
-%token<lexical_value_t> TK_PR_BOOL
-%token<lexical_value_t> TK_PR_IF
-%token<lexical_value_t> TK_PR_ELSE
-%token<lexical_value_t> TK_PR_WHILE
-%token<lexical_value_t> TK_PR_RETURN
-%token<lexical_value_t> TK_OC_LE
-%token<lexical_value_t> TK_OC_GE
-%token<lexical_value_t> TK_OC_EQ
-%token<lexical_value_t> TK_OC_NE
-%token<lexical_value_t> TK_OC_AND
-%token<lexical_value_t> TK_OC_OR
-%token<lexical_value_t> TK_IDENTIFICADOR
-%token<lexical_value_t> TK_LIT_INT
-%token<lexical_value_t> TK_LIT_FLOAT
-%token<lexical_value_t> TK_LIT_FALSE
-%token<lexical_value_t> TK_LIT_TRUE
-%token<lexical_value_t> TK_ERRO
+%token<lexical_value> TK_PR_INT
+%token<lexical_value> TK_PR_FLOAT
+%token<lexical_value> TK_PR_BOOL
+%token<lexical_value> TK_PR_IF
+%token<lexical_value> TK_PR_ELSE
+%token<lexical_value> TK_PR_WHILE
+%token<lexical_value> TK_PR_RETURN
+%token<lexical_value> TK_OC_LE
+%token<lexical_value> TK_OC_GE
+%token<lexical_value> TK_OC_EQ
+%token<lexical_value> TK_OC_NE
+%token<lexical_value> TK_OC_AND
+%token<lexical_value> TK_OC_OR
+%token<lexical_value> TK_IDENTIFICADOR
+%token<lexical_value> TK_LIT_INT
+%token<lexical_value> TK_LIT_FLOAT
+%token<lexical_value> TK_LIT_FALSE
+%token<lexical_value> TK_LIT_TRUE
+%token<lexical_value> TK_ERRO
 
-%define parse.error verbose
+%token<lexical_value> '='
+%token<lexical_value> '<'
+%token<lexical_value> '>'
+%token<lexical_value> '+'
+%token<lexical_value> '*'
+%token<lexical_value> '/'
+%token<lexical_value> '%'
+%token<lexical_value> '!'
+%token<lexical_value> '-'
+%token<lexical_value> type
+
+%type<nodo> program
+%type<nodo> list
+%type<nodo> element
+%type<nodo> function_definition
+%type<nodo> global_declaration
+%type<nodo> parameter_list
+%type<nodo> variable_declaration
+%type<nodo> local_declaration
+%type<nodo> identifier_list
+%type<nodo> tuple_parameter_list
+
+
+
+%define parse.error detailed;
 
 %start program;
 
 %%
 
-program: list
-    |
-    ;
+program: list {
+        $$ = $1;
+        arvore = $$;
+    };
 
-list:  list element | element;
+program: /* vazio */ { $$ = NULL; };
 
-element: function_definition
-    | global_declaration
-    ;
+
+
+ /* list:  list element | element; */
+
+ list: list element
+ {
+    if ($1 != NULL && $2 != NULL){
+        $$ = $1;
+        asd_add_child($$, $2);
+    }
+    else if ($1 != NULL){
+        $$ = $1;
+    }
+    else if ($2 != NULL){
+        $$ = $2
+    }
+    else{
+        $$ = NULL;
+    }
+ };
+
+list: element { $$ = $1; };
+
+
+element: function_definition { $$ = $1; };
+element: global_declaration {$$ = NULL; }; 
 
 function_definition: '(' parameter_list ')' TK_OC_GE type'!' TK_IDENTIFICADOR command_block
+    {
+
+        /*cria nodo*/
+        $$ = asd_new($1);
+
+        /*adiciona na arvore AST*/
+        if($7 != NULL){
+            asd_add_child($$, $7);
+        }
+    }
     ;
 
-parameter_list: type TK_IDENTIFICADOR
-    | parameter_list ',' type TK_IDENTIFICADOR
-    |
+function_definition: '(' ')' TK_OC_GE type'!' TK_IDENTIFICADOR command_block
+    {
+
+        /*cria nodo*/
+        $$ = asd_new($1);
+
+        /*adiciona na arvore AST*/
+        if($6 != NULL){
+            asd_add_child($$, $6);
+        }
+    }
     ;
+
+parameter_list: tuple_parameter_list {$$ = $1; };
+parameter_list: tuple_parameter_list ',' parameter_list { $$ = $1; asd_add_child($$,$3); };
+    
+    ;
+
+tuple_parameter_list:  type TK_IDENTIFICADOR { $$ = asd_new($2); };
 
 global_declaration: variable_declaration ';'
     ;
@@ -72,10 +145,9 @@ local_declaration: variable_declaration
 variable_declaration: type identifier_list
     ;
 
-type: TK_PR_INT
-    | TK_PR_FLOAT
-    | TK_PR_BOOL
-    ;
+type: TK_PR_INT { $$ = $1};
+type: TK_PR_FLOAT { $$ = $1};
+type: TK_PR_BOOL { $$ = $1};
 
 identifier_list: TK_IDENTIFICADOR
     | identifier_list ',' TK_IDENTIFICADOR

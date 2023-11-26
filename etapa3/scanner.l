@@ -62,6 +62,6 @@ true                    { yylval.lexical_value = lexical_value_create(TYPE, yyte
 <COMMENT>"\n"
 <COMMENT>.
 
-.                       { return TK_ERRO; };
+.                       { yylval.lexical_value = lexical_value_create(TYPE, yytext); return TK_ERRO; };
 
 %%

@@ -161,5 +161,5 @@ void yyerror (char const *mensagem)
 {
     int line = get_line_number();
     fprintf(stderr, "Erro de sintaxe na linha %d. \n", line);
-    exit(3);
+    
 }

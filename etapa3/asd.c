@@ -35,12 +35,15 @@ void asd_free(asd_tree_t *tree)
 
 void asd_add_child(asd_tree_t *tree, asd_tree_t *child)
 {
-  if (tree != NULL && child != NULL){
+  if (tree == NULL){
+    printf("Erro: %s recebeu parâmetro tree = %p / %p.\n", __FUNCTION__, tree, child);
+    return;
+  }
+
+  if (child != NULL){
     tree->number_of_children++;
     tree->children = realloc(tree->children, tree->number_of_children * sizeof(asd_tree_t*));
     tree->children[tree->number_of_children-1] = child;
-  }else{
-    printf("Erro: %s recebeu parâmetro tree = %p / %p.\n", __FUNCTION__, tree, child);
   }
 }
 

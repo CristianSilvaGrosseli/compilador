@@ -45,76 +45,77 @@ int get_line_number();
 
 %%
 
-program: list
+program: list { $$ = $1; arvore = $$; }
+    | { $$ = NULL; }
+    ;
+
+list:  list element { if ($1 != NULL) { $$ = $1; asd_add_child($$, $2); } else { $$ = $2; } }
+    | element { $$ = $1 };
+
+element: function_definition { $$ = $1; }
+    | global_declaration { $$ = NULL; }
+    ;
+
+function_definition: '(' parameter_list ')' TK_OC_GE type'!' TK_IDENTIFICADOR command_block { $$ = asd_new($1); asd_add_child($$, $7); }
+    ;
+
+parameter_list: type TK_IDENTIFICADOR { $$ = NULL /*$$ = asd_new($2);*/ }
+    | parameter_list ',' type TK_IDENTIFICADOR { $$ = NULL; /*$$ = $1; asd_add_child($$, $4);*/ }
+    | $$ = NULL;
+    ;
+
+global_declaration: variable_declaration ';' { $$ = $1; }
+    ;
+
+local_declaration: variable_declaration { $$ = $1; }
+    ;
+
+variable_declaration: type identifier_list { $$ = $2; }
+    ;
+
+type: TK_PR_INT { $$ = $1; }
+    | TK_PR_FLOAT { $$ = $1; }
+    | TK_PR_BOOL { $$ = $1; }
+    ;
+
+identifier_list: TK_IDENTIFICADOR  { $$ = $1; }
+    | identifier_list ',' TK_IDENTIFICADOR { if ($1 != NULL) { $$ = $1; asd_add_child($$, $3); } else { $$ = $3; } }
+    ;
+
+command_block: '{' command_list '}' { $$ = $2; }
+    ;
+
+command_list: simple_command command_list { if ($1 != NULL) { $$ = $1; asd_add_child($$, $2); } else { $$ = $2; } }
+    | { $$ = NULL; }
+    ;
+
+simple_command: local_declaration ';' { $$ = $1; }
+    | assignment ';' { $$ = $1; }
+    | function_call ';' { $$ = $1; }
+    | return_command ';' { $$ = $1; }
+    | conditional_if conditional_else ';' { $$ = $1; }
+    | iteration ';' { $$ = $1; }
+    | command_block ';' { $$ = $1; }
+    ;
+
+assignment: TK_IDENTIFICADOR '=' expression { $$ = asd_new($2); asd_add_child($$, asd_new($1)); asd_add_child($$, $3); }
+    ;
+
+function_call: TK_IDENTIFICADOR '(' expression_list ')' { $$ = asd_new($1); asd_add_child($$, $3); }
+    | TK_IDENTIFICADOR '(' ')'  { $$ = asd_new($1); }
+    ;
+
+return_command: TK_PR_RETURN expression { $$ = asd_new($1); asd_add_child($$, $2); }
+    ;
+
+conditional_if: TK_PR_IF '(' expression ')' command_block { $$ = asd_new($$,$1); asd_add_child($$,$2); asd_add_child($$,$3); }
+    ;
+
+conditional_else: TK_PR_ELSE command_block { $$ = asd_new($1); asd_add_child($$,$2); }
     |
     ;
 
-list:  list element | element;
-
-element: function_definition
-    | global_declaration
-    ;
-
-function_definition: '(' parameter_list ')' TK_OC_GE type'!' TK_IDENTIFICADOR command_block
-    ;
-
-parameter_list: type TK_IDENTIFICADOR
-    | parameter_list ',' type TK_IDENTIFICADOR
-    |
-    ;
-
-global_declaration: variable_declaration ';'
-    ;
-
-local_declaration: variable_declaration
-    ;
-
-variable_declaration: type identifier_list
-    ;
-
-type: TK_PR_INT
-    | TK_PR_FLOAT
-    | TK_PR_BOOL
-    ;
-
-identifier_list: TK_IDENTIFICADOR
-    | identifier_list ',' TK_IDENTIFICADOR
-    ;
-
-command_block: '{' command_list '}'
-    ;
-
-command_list: simple_command command_list
-    |
-    ;
-
-simple_command: local_declaration ';'
-    | assignment ';'
-    | function_call ';'
-    | return_command ';'
-    | conditional_if conditional_else ';'
-    | iteration ';'
-    | command_block ';'
-    ;
-
-assignment: TK_IDENTIFICADOR '=' expression
-    ;
-
-function_call: TK_IDENTIFICADOR '(' expression_list ')'
-    | TK_IDENTIFICADOR '(' ')'
-    ;
-
-return_command: TK_PR_RETURN expression
-    ;
-
-conditional_if: TK_PR_IF '(' expression ')' command_block
-    ;
-
-conditional_else: TK_PR_ELSE command_block
-    |
-    ;
-
-iteration: TK_PR_WHILE '(' expression ')' command_block
+iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = asd_new($1); asd_add_child($3); }
     ;
 
 expression_list: expression

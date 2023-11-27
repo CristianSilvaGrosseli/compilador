@@ -19,25 +19,59 @@ int get_line_number();
 	asd_tree_t* nodo;
 }
 
-%token<lexical_value_t> TK_PR_INT
-%token<lexical_value_t> TK_PR_FLOAT
-%token<lexical_value_t> TK_PR_BOOL
-%token<lexical_value_t> TK_PR_IF
-%token<lexical_value_t> TK_PR_ELSE
-%token<lexical_value_t> TK_PR_WHILE
-%token<lexical_value_t> TK_PR_RETURN
-%token<lexical_value_t> TK_OC_LE
-%token<lexical_value_t> TK_OC_GE
-%token<lexical_value_t> TK_OC_EQ
-%token<lexical_value_t> TK_OC_NE
-%token<lexical_value_t> TK_OC_AND
-%token<lexical_value_t> TK_OC_OR
-%token<lexical_value_t> TK_IDENTIFICADOR
-%token<lexical_value_t> TK_LIT_INT
-%token<lexical_value_t> TK_LIT_FLOAT
-%token<lexical_value_t> TK_LIT_FALSE
-%token<lexical_value_t> TK_LIT_TRUE
-%token<lexical_value_t> TK_ERRO
+%token<lexical_value> TK_PR_INT
+%token<lexical_value> TK_PR_FLOAT
+%token<lexical_value> TK_PR_BOOL
+%token<lexical_value> TK_PR_IF
+%token<lexical_value> TK_PR_ELSE
+%token<lexical_value> TK_PR_WHILE
+%token<lexical_value> TK_PR_RETURN
+%token<lexical_value> TK_OC_LE
+%token<lexical_value> TK_OC_GE
+%token<lexical_value> TK_OC_EQ
+%token<lexical_value> TK_OC_NE
+%token<lexical_value> TK_OC_AND
+%token<lexical_value> TK_OC_OR
+%token<lexical_value> TK_IDENTIFICADOR
+%token<lexical_value> TK_LIT_INT
+%token<lexical_value> TK_LIT_FLOAT
+%token<lexical_value> TK_LIT_FALSE
+%token<lexical_value> TK_LIT_TRUE
+%token<lexical_value> TK_ERRO
+
+%token<lexical_value> '='
+%token<lexical_value> '<'
+%token<lexical_value> '>'
+%token<lexical_value> '+'
+%token<lexical_value> '*'
+%token<lexical_value> '/'
+%token<lexical_value> '%'
+%token<lexical_value> '!'
+%token<lexical_value> '-'
+
+%type<lexical_value> type
+
+%type<nodo> program
+%type<nodo> list
+%type<nodo> element
+%type<nodo> function_definition
+%type<nodo> global_declaration
+%type<nodo> parameter_list
+%type<nodo> variable_declaration
+%type<nodo> local_declaration
+%type<nodo> identifier_list
+%type<nodo> command_list
+%type<nodo> simple_command
+%type<nodo> command_block
+%type<nodo> assignment
+%type<nodo> function_call
+%type<nodo> return_command
+%type<nodo> conditional_if
+%type<nodo> conditional_else
+%type<nodo> iteration
+%type<nodo> expression_list
+%type<nodo> expression
+
 
 %define parse.error verbose
 
@@ -46,22 +80,23 @@ int get_line_number();
 %%
 
 program: list { $$ = $1; arvore = $$; }
-    | { $$ = NULL; }
+    | /*vazio */ { $$ = NULL; }
     ;
 
 list:  list element { if ($1 != NULL) { $$ = $1; asd_add_child($$, $2); } else { $$ = $2; } }
-    | element { $$ = $1 };
+    | element { $$ = $1; };
 
 element: function_definition { $$ = $1; }
     | global_declaration { $$ = NULL; }
     ;
 
-function_definition: '(' parameter_list ')' TK_OC_GE type'!' TK_IDENTIFICADOR command_block { $$ = asd_new($1); asd_add_child($$, $7); }
+function_definition: '(' parameter_list ')' TK_OC_GE type'!' TK_IDENTIFICADOR command_block { $$ = asd_new($2); asd_add_child($$, $7); }
     ;
 
-parameter_list: type TK_IDENTIFICADOR { $$ = NULL /*$$ = asd_new($2);*/ }
+
+parameter_list: type TK_IDENTIFICADOR { $$ = NULL; /*$$ = asd_new($2);*/ }
     | parameter_list ',' type TK_IDENTIFICADOR { $$ = NULL; /*$$ = $1; asd_add_child($$, $4);*/ }
-    | $$ = NULL;
+    | {$$ = NULL; }
     ;
 
 global_declaration: variable_declaration ';' { $$ = $1; }
@@ -108,14 +143,14 @@ function_call: TK_IDENTIFICADOR '(' expression_list ')' { $$ = asd_new($1); asd_
 return_command: TK_PR_RETURN expression { $$ = asd_new($1); asd_add_child($$, $2); }
     ;
 
-conditional_if: TK_PR_IF '(' expression ')' command_block { $$ = asd_new($$,$1); asd_add_child($$,$2); asd_add_child($$,$3); }
+conditional_if: TK_PR_IF '(' expression ')' command_block { $$ = asd_new($1); asd_add_child($$,$3); asd_add_child($$,$5); }
     ;
 
 conditional_else: TK_PR_ELSE command_block { $$ = asd_new($1); asd_add_child($$,$2); }
     |
     ;
 
-iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = asd_new($1); asd_add_child($3); }
+iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = asd_new($1); asd_add_child($$,$3); }
     ;
 
 expression_list: expression

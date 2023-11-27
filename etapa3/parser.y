@@ -71,7 +71,13 @@ int get_line_number();
 %type<nodo> iteration
 %type<nodo> expression_list
 %type<nodo> expression
-
+%type<nodo> precedence_6
+%type<nodo> precedence_5
+%type<nodo> precedence_4
+%type<nodo> precedence_3
+%type<nodo> precedence_2
+%type<nodo> precedence_1
+%type<nodo> literal 
 
 %define parse.error verbose
 
@@ -150,45 +156,45 @@ conditional_else: TK_PR_ELSE command_block { $$ = asd_new($1); asd_add_child($$,
     |
     ;
 
-iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = asd_new($1); asd_add_child($$,$3); }
+iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = asd_new($1); asd_add_child($$,$3); if($5 != NULL){ asd_add_child($$, $5); }}
     ;
 
-expression_list: expression
-    | expression_list ',' expression
+expression_list: expression { $$ = $1 ; }
+    | expression_list ',' expression {$$=asd_new($1); asd_add_child($$, $3);}
     ;
 
-expression: precedence_6
-    | expression TK_OC_OR precedence_6
+expression: precedence_6 {$$=$1;}
+    | expression TK_OC_OR precedence_6 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
     ;
 
-precedence_6: precedence_5
-    | precedence_6 TK_OC_AND precedence_5
+precedence_6: precedence_5                {$$=$1;}
+    | precedence_6 TK_OC_AND precedence_5 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
     ;
 
-precedence_5: precedence_4
-    | precedence_5 TK_OC_EQ precedence_4
-    | precedence_5 TK_OC_NE precedence_4
+precedence_5: precedence_4               {$$=$1;}
+    | precedence_5 TK_OC_EQ precedence_4 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | precedence_5 TK_OC_NE precedence_4 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
     ;
 
-precedence_4: precedence_3
-    | precedence_4 '<' precedence_3
-    | precedence_4 '>' precedence_3
-    | precedence_4 TK_OC_LE precedence_3
-    | precedence_4 TK_OC_GE precedence_3
+precedence_4: precedence_3          {$$=$1;}
+    | precedence_4 '<' precedence_3 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | precedence_4 '>' precedence_3 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | precedence_4 TK_OC_LE precedence_3 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | precedence_4 TK_OC_GE precedence_3 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
     ;
 
-precedence_3: precedence_2
-    | precedence_3 '+' precedence_2
-    | precedence_3 '-' precedence_2
+precedence_3: precedence_2          {$$=$1;}
+    | precedence_3 '+' precedence_2 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | precedence_3 '-' precedence_2 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
     ;
 
-precedence_2: precedence_1
-    | precedence_2 '*' precedence_1
-    | precedence_2 '/' precedence_1
-    | precedence_2 '%' precedence_1
+precedence_2: precedence_1 {$$=$1;}
+    | precedence_2 '*' precedence_1 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | precedence_2 '/' precedence_1 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | precedence_2 '%' precedence_1 { $$ = asd_new($2); asd_add_child($$, $1); asd_add_child($$, $3); };
     ;
 
-precedence_1: '(' expression ')'
+precedence_1: '(' expression ')' {$$=$2;}
     | '!' precedence_1
     | '-' precedence_1
     | TK_IDENTIFICADOR
@@ -196,10 +202,10 @@ precedence_1: '(' expression ')'
     | function_call
     ;
 
-literal: TK_LIT_INT
-    | TK_LIT_FLOAT
-    | TK_LIT_FALSE
-    | TK_LIT_TRUE
+literal: TK_LIT_INT {$$=$1;}
+    | TK_LIT_FLOAT {$$=$1;}
+    | TK_LIT_FALSE {$$=$1;}
+    | TK_LIT_TRUE {$$=$1;}
     ;
 
 %%

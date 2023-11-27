@@ -195,11 +195,11 @@ precedence_2: precedence_1 {$$=$1;}
     ;
 
 precedence_1: '(' expression ')' {$$=$2;}
-    | '!' precedence_1
-    | '-' precedence_1
-    | TK_IDENTIFICADOR
-    | literal
-    | function_call
+    | '!' precedence_1  { $$ = asd_new($1); asd_add_child($$, $2); };
+    | '-' precedence_1  { $$ = asd_new($1); asd_add_child($$, $2); };
+    | TK_IDENTIFICADOR  { $$ = asd_new($1); };
+    | literal           { $$ = asd_new($1); };
+    | function_call     { $$ = $1; };
     ;
 
 literal: TK_LIT_INT {$$=$1;}

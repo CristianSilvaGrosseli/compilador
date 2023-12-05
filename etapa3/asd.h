@@ -1,3 +1,7 @@
+// Entrega 3
+// Cristian Silva Grosseli - 00243693
+// Iuri Mendonça Tinti - 00278043
+
 #pragma once
 #ifndef _ARVORE_H_
 #define _ARVORE_H_
@@ -8,6 +12,8 @@
 #define CONTROL 3
 #define OPERATOR 4 
 #define EXPRESSION  5 
+
+#define ARVORE_CALL 1
 
 typedef struct lexical_value
 {
@@ -20,13 +26,13 @@ typedef struct asd_tree {
   int number_of_children;
   struct asd_tree **children;
   struct lexical_value* label;
-  char* lexeme;
+  int arvore_node_type;
 } asd_tree_t;
 
 /*
  * Função asd_new, cria um nó sem filhos com o label informado.
  */
-asd_tree_t *asd_new(lexical_value_t *label);
+asd_tree_t *asd_new(lexical_value_t *label, int arvore_node_type);
 
 /*
  * Função asd_tree, libera recursivamente o nó e seus filhos.

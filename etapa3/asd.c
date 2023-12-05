@@ -1,3 +1,7 @@
+// Entrega 3
+// Cristian Silva Grosseli - 00243693
+// Iuri Mendonça Tinti - 00278043
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -6,7 +10,7 @@
 
 #define ARQUIVO_SAIDA "saida.dot"
 
-asd_tree_t *asd_new(lexical_value_t *label)
+asd_tree_t *asd_new(lexical_value_t *label, int arvore_node_type)
 {
   asd_tree_t *ret = NULL;
   ret = calloc(1, sizeof(asd_tree_t));
@@ -14,6 +18,7 @@ asd_tree_t *asd_new(lexical_value_t *label)
     ret->label = label;
     ret->children = NULL;
     ret->number_of_children = 0;
+    ret->arvore_node_type = arvore_node_type;
   }
   return ret;
 }
@@ -47,21 +52,6 @@ void asd_add_child(asd_tree_t *tree, asd_tree_t *child)
   }
 }
 
-/*
-static void _asd_print (FILE *foutput, asd_tree_t *tree, int profundidade)
-{
-  int i;
-  if (tree != NULL){
-    fprintf(foutput, "%d%*s: Nó '%s' tem %d filhos:\n", profundidade, profundidade*2, "", tree->label, tree->number_of_children);
-    for (i = 0; i < tree->number_of_children; i++){
-      _asd_print(foutput, tree->children[i], profundidade+1);
-    }
-  }else{
-    printf("Erro: %s recebeu parâmetro tree = %p.\n", __FUNCTION__, tree);
-  }
-}
-*/
-
 static void _print_node (FILE *foutput, asd_tree_t* node, int depth)
 {
   if (node == NULL)
@@ -69,7 +59,20 @@ static void _print_node (FILE *foutput, asd_tree_t* node, int depth)
     return;
   }
 
-  fprintf(foutput, "%p [label=\"%d\"];\n", node, node->label->token_type);
+
+  char* arvore_label = NULL;
+  if (node->arvore_node_type == ARVORE_CALL)
+  {
+    char* prefix = "call ";
+    arvore_label = malloc(strlen(prefix) + strlen(node->label->token_value) + 1);
+    strcpy(arvore_label, prefix);
+    strcat(arvore_label, node->label->token_value);
+  }
+  else
+  {
+    arvore_label = node->label->token_value;
+  }
+  fprintf(foutput, "%p [label=\"%s\"];\n", node, arvore_label);
   
   int i;
   for (i = 0; i < node->number_of_children; i++){

@@ -14,43 +14,43 @@
 
 %%
 
-int                     { yylval.lexical_value = lexical_value_create(TYPE, yytext); return TK_PR_INT; }
-float                   { yylval.lexical_value = lexical_value_create(TYPE, yytext); return TK_PR_FLOAT; }
-bool                    { yylval.lexical_value = lexical_value_create(TYPE, yytext); return TK_PR_BOOL; }
-if                      { yylval.lexical_value = lexical_value_create(TYPE, yytext); return TK_PR_IF; }
-else                    { yylval.lexical_value = lexical_value_create(TYPE, yytext); return TK_PR_ELSE; }
-while                   { yylval.lexical_value = lexical_value_create(TYPE, yytext); return TK_PR_WHILE; }
-return                  { yylval.lexical_value = lexical_value_create(TYPE, yytext); return TK_PR_RETURN; }
+int                     { yylval.valor_lexico = lexical_value_create(TYPE, yytext); return TK_PR_INT; }
+float                   { yylval.valor_lexico = lexical_value_create(TYPE, yytext); return TK_PR_FLOAT; }
+bool                    { yylval.valor_lexico = lexical_value_create(TYPE, yytext); return TK_PR_BOOL; }
+if                      { yylval.valor_lexico = lexical_value_create(CONTROL, yytext); return TK_PR_IF; }
+else                    { yylval.valor_lexico = lexical_value_create(CONTROL, yytext); return TK_PR_ELSE; }
+while                   { yylval.valor_lexico = lexical_value_create(CONTROL, yytext); return TK_PR_WHILE; }
+return                  { yylval.valor_lexico = lexical_value_create(CONTROL, yytext); return TK_PR_RETURN; }
 
--                       { yylval.lexical_value = lexical_value_create(TYPE, yytext); return yytext[0]; }
-\+                      { yylval.lexical_value = lexical_value_create(TYPE, yytext); return yytext[0]; }
-!                       { yylval.lexical_value = lexical_value_create(TYPE, yytext); return yytext[0]; }
-\*                      { yylval.lexical_value = lexical_value_create(TYPE, yytext); return yytext[0]; }
-\/                      { yylval.lexical_value = lexical_value_create(TYPE, yytext); return yytext[0]; }
-%                       { yylval.lexical_value = lexical_value_create(TYPE, yytext); return yytext[0]; }
-\<                      { yylval.lexical_value = lexical_value_create(TYPE, yytext); return yytext[0]; }
-=                       { yylval.lexical_value = lexical_value_create(TYPE, yytext); return yytext[0]; }
->                       { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return yytext[0]; }
-\{                      { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return yytext[0]; }
-\}                      { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return yytext[0]; }
-\(                      { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return yytext[0]; }
-\)                      { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return yytext[0]; }
-,                       { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return yytext[0]; }
-;                       { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return yytext[0]; }
+-                       { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext); return yytext[0]; }
+\+                      { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext); return yytext[0]; }
+!                       { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext); return yytext[0]; }
+\*                      { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext); return yytext[0]; }
+\/                      { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext); return yytext[0]; }
+%                       { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext); return yytext[0]; }
+\<                      { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext); return yytext[0]; }
+=                       { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext); return yytext[0]; }
+>                       { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext);  return yytext[0]; }
+\{                      { yylval.valor_lexico = lexical_value_create(EXPRESSION, yytext);  return yytext[0]; }
+\}                      { yylval.valor_lexico = lexical_value_create(EXPRESSION, yytext);  return yytext[0]; }
+\(                      { yylval.valor_lexico = lexical_value_create(EXPRESSION, yytext);  return yytext[0]; }
+\)                      { yylval.valor_lexico = lexical_value_create(EXPRESSION, yytext);  return yytext[0]; }
+,                       { yylval.valor_lexico = lexical_value_create(EXPRESSION, yytext);  return yytext[0]; }
+;                       { yylval.valor_lexico = lexical_value_create(EXPRESSION, yytext);  return yytext[0]; }
 
-&                       { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return TK_OC_AND; }
-\|                      { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return TK_OC_OR; }
+&                       { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext);  return TK_OC_AND; }
+\|                      { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext);  return TK_OC_OR; }
 
-\<=                     { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return TK_OC_LE; }
-==                      { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return TK_OC_EQ; }
->=                      { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return TK_OC_GE; }
-!=                      { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return TK_OC_NE; }
+\<=                     { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext);  return TK_OC_LE; }
+==                      { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext);  return TK_OC_EQ; }
+>=                      { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext);  return TK_OC_GE; }
+!=                      { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext);  return TK_OC_NE; }
 
-false                   { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return TK_LIT_FALSE; }
-true                    { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return TK_LIT_TRUE; }
-(_|[a-z])[_a-z0-9]*	    { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return TK_IDENTIFICADOR; }
-[0-9]+                  { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return TK_LIT_INT; }
-[0-9]*(\.[0-9])[0-9]*   { yylval.lexical_value = lexical_value_create(TYPE, yytext);  return TK_LIT_FLOAT; }
+false                   { yylval.valor_lexico = lexical_value_create(LITERAL, yytext);  return TK_LIT_FALSE; }
+true                    { yylval.valor_lexico = lexical_value_create(LITERAL, yytext);  return TK_LIT_TRUE; }
+(_|[a-z])[_a-z0-9]*	    { yylval.valor_lexico = lexical_value_create(IDENTIFIER, yytext);  return TK_IDENTIFICADOR; }
+[0-9]+                  { yylval.valor_lexico = lexical_value_create(LITERAL, yytext);  return TK_LIT_INT; }
+[0-9]*(\.[0-9])[0-9]*   { yylval.valor_lexico = lexical_value_create(LITERAL, yytext);  return TK_LIT_FLOAT; }
 
 "\n"
 [ \t]
@@ -62,6 +62,6 @@ true                    { yylval.lexical_value = lexical_value_create(TYPE, yyte
 <COMMENT>"\n"
 <COMMENT>.
 
-.                       { yylval.lexical_value = lexical_value_create(TYPE, yytext); return TK_ERRO; };
+.                       { return TK_ERRO; };
 
 %%

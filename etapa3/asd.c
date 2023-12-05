@@ -62,28 +62,50 @@ static void _asd_print (FILE *foutput, asd_tree_t *tree, int profundidade)
 }
 */
 
-static void _asd_print_dfs(FILE *foutput, asd_tree_t* root)
+static void _print_node (FILE *foutput, asd_tree_t* node, int depth)
 {
-  if (root == NULL)
+  if (node == NULL)
   {
-      return;
+    return;
   }
 
-  printf("%s ", root->label->token_value);
-
-  for (int i = 0; i < root->number_of_children; i++)
-  {
-      _asd_print_dfs(foutput, root->children[i]);
+  fprintf(foutput, "%p [label=\"%d\"];\n", node, node->label->token_type);
+  
+  int i;
+  for (i = 0; i < node->number_of_children; i++){
+    _print_node(foutput, node->children[i], depth+1);
   }
 }
 
-void asd_print(asd_tree_t *tree)
+void print_node(asd_tree_t *node)
 {
   FILE *foutput = stderr;
-  if (tree != NULL){
-    _asd_print_dfs(foutput, tree);
-  }else{
-    printf("Erro: %s recebeu parâmetro tree = %p.\n", __FUNCTION__, tree);
+  if (node != NULL){
+    _print_node(foutput, node, 0);
+  }
+}
+
+void print_tree(asd_tree_t *node)
+{
+  FILE *foutput = stderr;
+  if (node != NULL){
+    _print_tree(foutput, node, 0);
+  }
+}
+
+static void _print_tree (FILE *foutput, asd_tree_t *node, int depth)
+{
+  if (node == NULL)
+  {
+    return;
+  }
+
+  int i;
+  for (i = 0; i < node->number_of_children; i++){
+    fprintf(foutput, "%p - %p\n", node, node->children[i]);
+  }
+  for (i = 0; i < node->number_of_children; i++){
+    _print_tree(foutput, node->children[i], depth+1);
   }
 }
 
@@ -96,8 +118,6 @@ static void _asd_print_graphviz (FILE *foutput, asd_tree_t *tree)
       fprintf(foutput, "  %ld -> %ld;\n", (long)tree, (long)tree->children[i]);
       _asd_print_graphviz(foutput, tree->children[i]);
     }
-  }else{
-    printf("Erro: %s recebeu parâmetro tree = %p.\n", __FUNCTION__, tree);
   }
 }
 
@@ -112,8 +132,6 @@ void asd_print_graphviz(asd_tree_t *tree)
     _asd_print_graphviz(foutput, tree);
     fprintf(foutput, "}\n");
     fclose(foutput);
-  }else{
-    printf("Erro: %s recebeu parâmetro tree = %p.\n", __FUNCTION__, tree);
   }
 }
 
@@ -123,4 +141,15 @@ lexical_value_t* lexical_value_create(int token_type, char* token_value)
   value->token_line = get_line_number();
   value->token_type = token_type;
   value->token_value = strdup(token_value);
+}
+
+
+void exporta(void *arvore)
+{
+  asd_tree_t* tree_node;
+  tree_node = (asd_tree_t*) arvore;
+  print_tree(arvore);
+  print_node(arvore);
+  asd_print_graphviz(arvore);
+  return;
 }

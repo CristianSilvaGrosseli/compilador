@@ -4,12 +4,10 @@
 
 #define LITERAL 0
 #define IDENTIFIER 1
-#define EXPRESSION_OPERATOR 2
-#define LANGUAGE_OPERATOR 3
-#define CONTROL 4
-#define TYPE 5
-#define SYNTAX_TOKEN 6
-#define FUNCTION_CALL 7
+#define TYPE 2
+#define CONTROL 3
+#define OPERATOR 4 
+#define EXPRESSION  5 
 
 typedef struct lexical_value
 {
@@ -22,6 +20,7 @@ typedef struct asd_tree {
   int number_of_children;
   struct asd_tree **children;
   struct lexical_value* label;
+  char* lexeme;
 } asd_tree_t;
 
 /*
@@ -40,16 +39,16 @@ void asd_free(asd_tree_t *tree);
 void asd_add_child(asd_tree_t *tree, asd_tree_t *child);
 
 /*
- * Função asd_print, imprime recursivamente a árvore.
+ * Funções que imprimem recursivamente a árvore.
  */
-void asd_print(asd_tree_t *tree);
-
+void print_node(asd_tree_t *node);
+static void _print_node (FILE *foutput, asd_tree_t* node, int depth);
+void print_tree(asd_tree_t *node);
+static void _print_tree (FILE *foutput, asd_tree_t *node, int depth);
 /*
  * Função asd_print_graphviz, idem, em formato DOT
  */
 void asd_print_graphviz (asd_tree_t *tree);
-
-static void _asd_print_dfs(FILE *foutput, asd_tree_t* root);
 
 lexical_value_t* lexical_value_create(int token_type, char* token_value);
 

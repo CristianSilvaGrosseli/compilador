@@ -15,41 +15,41 @@ int get_line_number();
 
 %union
 {
-	lexical_value_t* lexical_value;
+	lexical_value_t* valor_lexico;
 	asd_tree_t* nodo;
 }
 
-%token<lexical_value> TK_PR_INT
-%token<lexical_value> TK_PR_FLOAT
-%token<lexical_value> TK_PR_BOOL
-%token<lexical_value> TK_PR_IF
-%token<lexical_value> TK_PR_ELSE
-%token<lexical_value> TK_PR_WHILE
-%token<lexical_value> TK_PR_RETURN
-%token<lexical_value> TK_OC_LE
-%token<lexical_value> TK_OC_GE
-%token<lexical_value> TK_OC_EQ
-%token<lexical_value> TK_OC_NE
-%token<lexical_value> TK_OC_AND
-%token<lexical_value> TK_OC_OR
-%token<lexical_value> TK_IDENTIFICADOR
-%token<lexical_value> TK_LIT_INT
-%token<lexical_value> TK_LIT_FLOAT
-%token<lexical_value> TK_LIT_FALSE
-%token<lexical_value> TK_LIT_TRUE
-%token<lexical_value> TK_ERRO
+%token<valor_lexico> TK_PR_INT
+%token<valor_lexico> TK_PR_FLOAT
+%token<valor_lexico> TK_PR_BOOL
+%token<valor_lexico> TK_PR_IF
+%token<valor_lexico> TK_PR_ELSE
+%token<valor_lexico> TK_PR_WHILE
+%token<valor_lexico> TK_PR_RETURN
+%token<valor_lexico> TK_OC_LE
+%token<valor_lexico> TK_OC_GE
+%token<valor_lexico> TK_OC_EQ
+%token<valor_lexico> TK_OC_NE
+%token<valor_lexico> TK_OC_AND
+%token<valor_lexico> TK_OC_OR
+%token<valor_lexico> TK_IDENTIFICADOR
+%token<valor_lexico> TK_LIT_INT
+%token<valor_lexico> TK_LIT_FLOAT
+%token<valor_lexico> TK_LIT_FALSE
+%token<valor_lexico> TK_LIT_TRUE
+%token<valor_lexico> TK_ERRO
 
-%token<lexical_value> '='
-%token<lexical_value> '<'
-%token<lexical_value> '>'
-%token<lexical_value> '+'
-%token<lexical_value> '*'
-%token<lexical_value> '/'
-%token<lexical_value> '%'
-%token<lexical_value> '!'
-%token<lexical_value> '-'
+%token<valor_lexico> '='
+%token<valor_lexico> '<'
+%token<valor_lexico> '>'
+%token<valor_lexico> '+'
+%token<valor_lexico> '*'
+%token<valor_lexico> '/'
+%token<valor_lexico> '%'
+%token<valor_lexico> '!'
+%token<valor_lexico> '-'
 
-%type<lexical_value> type
+%type<valor_lexico> type
 
 %type<nodo> program
 %type<nodo> list
@@ -96,7 +96,7 @@ element: function_definition { $$ = $1; }
     | global_declaration { $$ = NULL; }
     ;
 
-function_definition: '(' parameter_list ')' TK_OC_GE type'!' TK_IDENTIFICADOR command_block { $$ = asd_new($2); asd_add_child($$, $7); }
+function_definition: '(' parameter_list ')' TK_OC_GE type'!' TK_IDENTIFICADOR command_block { $$ = asd_new($6); asd_add_child($$,asd_new($7)); }
     ;
 
 
@@ -119,8 +119,8 @@ type: TK_PR_INT { $$ = $1; }
     | TK_PR_BOOL { $$ = $1; }
     ;
 
-identifier_list: TK_IDENTIFICADOR  { $$ = $1; }
-    | identifier_list ',' TK_IDENTIFICADOR { if ($1 != NULL) { $$ = $1; asd_add_child($$, $3); } else { $$ = $3; } }
+identifier_list: TK_IDENTIFICADOR  { $$ = asd_new($1); }
+    | identifier_list ',' TK_IDENTIFICADOR { if ($1 != NULL) { $$ = $1; asd_add_child($$, asd_new($3)); } else { $$ = asd_new($3); } }
     ;
 
 command_block: '{' command_list '}' { $$ = $2; }
@@ -153,14 +153,14 @@ conditional_if: TK_PR_IF '(' expression ')' command_block { $$ = asd_new($1); as
     ;
 
 conditional_else: TK_PR_ELSE command_block { $$ = asd_new($1); asd_add_child($$,$2); }
-    |
+    | { $$ = NULL; }
     ;
 
 iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = asd_new($1); asd_add_child($$,$3); if($5 != NULL){ asd_add_child($$, $5); }}
     ;
 
 expression_list: expression { $$ = $1 ; }
-    | expression_list ',' expression {$$=asd_new($1); asd_add_child($$, $3);}
+    | expression_list ',' expression {$$ = $1; asd_add_child($$, $3);}
     ;
 
 expression: precedence_6 {$$=$1;}
@@ -198,14 +198,14 @@ precedence_1: '(' expression ')' {$$=$2;}
     | '!' precedence_1  { $$ = asd_new($1); asd_add_child($$, $2); };
     | '-' precedence_1  { $$ = asd_new($1); asd_add_child($$, $2); };
     | TK_IDENTIFICADOR  { $$ = asd_new($1); };
-    | literal           { $$ = asd_new($1); };
+    | literal           { $$ = $1; };
     | function_call     { $$ = $1; };
     ;
 
-literal: TK_LIT_INT {$$=$1;}
-    | TK_LIT_FLOAT {$$=$1;}
-    | TK_LIT_FALSE {$$=$1;}
-    | TK_LIT_TRUE {$$=$1;}
+literal: TK_LIT_INT {$$ = asd_new($1);}
+    | TK_LIT_FLOAT {$$ = asd_new($1);}
+    | TK_LIT_FALSE {$$ = asd_new($1);}
+    | TK_LIT_TRUE {$$ = asd_new($1);}
     ;
 
 %%

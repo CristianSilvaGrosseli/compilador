@@ -105,7 +105,7 @@ static void _print_tree (FILE *foutput, asd_tree_t *node, int depth)
 
   int i;
   for (i = 0; i < node->number_of_children; i++){
-    fprintf(foutput, "%p - %p\n", node, node->children[i]);
+    fprintf(foutput, "%p, %p\n", node, node->children[i]);
   }
   for (i = 0; i < node->number_of_children; i++){
     _print_tree(foutput, node->children[i], depth+1);

@@ -11,6 +11,7 @@ int yylex(void);
 int yyerror (char const *mensagem);
 extern void* arvore;
 int get_line_number();
+int counter=0;
 %}
 
 %union
@@ -85,12 +86,23 @@ int get_line_number();
 
 %%
 
-program: list { $$ = $1; arvore = $$; }
-    | /*vazio */ { $$ = NULL; }
+program: %empty { $$ = NULL; arvore = NULL;} 
+    | list  {  $$ = $1; arvore = $$; }
     ;
 
-list:  list element { if ($1 != NULL) { $$ = $1; asd_add_child($$, $2); } else { $$ = $2; } }
-    | element { $$ = $1; };
+
+list: element list  { if ($1 != NULL  && $2 !=NULL){
+                         $$ = $1; 
+                         asd_add_child($$, $2);
+                         } 
+                        else if ($1 != NULL ) 
+                            { $$ = $1; } 
+                          else if ($2 != NULL)
+                            { $$ = $2; }
+                            else{ $$ = NULL;} 
+                        }
+    | element { $$ = $1; }
+    ;
 
 element: function_definition { $$ = $1; }
     | global_declaration { $$ = NULL; }
@@ -101,7 +113,7 @@ function_definition: '(' parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR c
 
 parameter_list: type TK_IDENTIFICADOR { $$ = asd_new($2, 0); }
     | parameter_list ',' type TK_IDENTIFICADOR { if ($1 != NULL) { $$ = $1; asd_add_child($$, asd_new($4,0)); } else { $$ = asd_new($4,0); } }
-    | {$$ = NULL; }
+    | %empty {$$ = NULL; }
     ;
 
 global_declaration: variable_declaration ';' { $$ = $1; }
@@ -126,7 +138,7 @@ command_block: '{' command_list '}' { $$ = $2; }
     ;
 
 command_list: simple_command command_list { if ($1 != NULL) { $$ = $1; asd_add_child($$, $2); } else { $$ = $2; } }
-    | { $$ = NULL; }
+    | %empty { $$ = NULL; }
     ;
 
 simple_command: local_declaration ';' { $$ = $1; }
@@ -152,7 +164,7 @@ conditional_if: TK_PR_IF '(' expression ')' command_block { $$ = asd_new($1, 0);
     ;
 
 conditional_else: TK_PR_ELSE command_block { $$ = asd_new($1, 0); asd_add_child($$,$2); }
-    | { $$ = NULL; }
+    | %empty { $$ = NULL; }
     ;
 
 iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$, $5); }

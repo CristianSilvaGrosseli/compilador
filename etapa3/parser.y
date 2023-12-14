@@ -120,7 +120,7 @@ tupla_tipo_parametro: type TK_IDENTIFICADOR {$$ = asd_new($2, 0);};
 
 
 parameter_list: tupla_tipo_parametro {$$=$1;}
-    | tupla_tipo_parametro ',' parameter_list { $$ = $1; asd_add_child($$, $3); };
+    | parameter_list ',' tupla_tipo_parametro { $$ = $1; asd_add_child($$, $3); };
 
 
 
@@ -194,7 +194,7 @@ iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = asd_new($1, 0); a
     ;
 
 expression_list: expression { $$ = $1 ; }
-    | expression_list ',' expression {$$ = $1; asd_add_child($$, $3);}
+    | expression  ',' expression_list {$$ = $1; asd_add_child($$, $3);}
     ;
 
 expression: precedence_6 {$$=$1;}

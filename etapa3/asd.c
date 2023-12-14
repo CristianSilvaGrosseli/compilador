@@ -127,7 +127,19 @@ static void _asd_print_graphviz_labels(FILE *foutput, asd_tree_t *tree)
 {
   int i;
   if (tree != NULL){
-    fprintf(foutput, "  %ld [ label=\"%s\" ];\n", (long)tree, tree->label->token_value);
+    char* arvore_label = NULL;
+    if (tree->arvore_node_type == ARVORE_CALL)
+    {
+      char* prefix = "call ";
+      arvore_label = malloc(strlen(prefix) + strlen(tree->label->token_value) + 1);
+      strcpy(arvore_label, prefix);
+      strcat(arvore_label, tree->label->token_value);
+    }
+    else
+    {
+      arvore_label = tree->label->token_value;
+    }
+    fprintf(foutput, "  %ld [ label=\"%s\" ];\n", (long)tree, arvore_label);
     for (i = 0; i < tree->number_of_children; i++){
       _asd_print_graphviz_labels(foutput, tree->children[i]);
     }

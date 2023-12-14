@@ -58,6 +58,7 @@ int counter=0;
 %type<nodo> function_definition
 %type<nodo> global_declaration
 %type<nodo> parameter_list
+%type<nodo> tupla_tipo_parametro
 %type<nodo> variable_declaration
 %type<nodo> local_declaration
 %type<nodo> identifier_list
@@ -108,13 +109,21 @@ element: function_definition { $$ = $1; }
     | global_declaration { $$ = NULL; }
     ;
 
-function_definition: '(' parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = asd_new($7, 0); asd_add_child($$,$8); }
+function_definition: '(' parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = asd_new($7, 0); if($8!=NULL){ asd_add_child($$,$8);} }
     ;
 
-parameter_list: type TK_IDENTIFICADOR { $$ = asd_new($2, 0); }
-    | parameter_list ',' type TK_IDENTIFICADOR { if ($1 != NULL) { $$ = $1; asd_add_child($$, asd_new($4,0)); } else { $$ = asd_new($4,0); } }
-    | %empty {$$ = NULL; }
+function_definition: '(' ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = asd_new($6, 0); if($7!=NULL){ asd_add_child($$,$7);} }
     ;
+
+
+tupla_tipo_parametro: type TK_IDENTIFICADOR {$$ = asd_new($2, 0);};
+
+
+parameter_list: tupla_tipo_parametro {$$=$1;}
+    | tupla_tipo_parametro ',' parameter_list { $$ = $1; asd_add_child($$, $3); };
+
+
+
 
 global_declaration: variable_declaration ';' { $$ = $1; }
     ;
@@ -130,27 +139,41 @@ type: TK_PR_INT { $$ = $1; }
     | TK_PR_BOOL { $$ = $1; }
     ;
 
-identifier_list: TK_IDENTIFICADOR  { $$ = asd_new($1, 0); }
+identifier_list: TK_IDENTIFICADOR  { $$ = NULL;}
     | identifier_list ',' TK_IDENTIFICADOR { if ($1 != NULL) { $$ = $1; asd_add_child($$, asd_new($3, 0)); } else { $$ = asd_new($3, 0); } }
     ;
 
-command_block: '{' command_list '}' { $$ = $2; }
+command_block: '{' '}' {$$ = NULL; } 
+    | '{' command_list '}' { $$ = $2; }
     ;
 
-command_list: simple_command command_list { if ($1 != NULL) { $$ = $1; asd_add_child($$, $2); } else { $$ = $2; } }
-    | %empty { $$ = NULL; }
+command_list: simple_command ';' command_list {
+
+        if($1 == NULL) {
+            $$ = $3;
+        }
+        else{ 
+            asd_add_child($1, $3);;
+            $$ = $1;
+        }
+    }
+    | simple_command ';' {$$ = $1;}
     ;
 
-simple_command: local_declaration ';' { $$ = $1; }
-    | assignment ';' { $$ = $1; }
-    | function_call ';' { $$ = $1; }
-    | return_command ';' { $$ = $1; }
-    | conditional_if conditional_else ';' { $$ = $1; asd_add_child($$, $2); }
-    | iteration ';' { $$ = $1; }
-    | command_block ';' { $$ = $1; }
+simple_command: local_declaration { $$ = $1; }
+    | assignment { $$ = $1; }
+    | function_call { $$ = $1; }
+    | return_command { $$ = $1; }
+    | conditional_if conditional_else { $$ = $1; asd_add_child($$, $2); }
+    | iteration { $$ = $1; }
+    | command_block { $$ = $1; }
     ;
 
-assignment: TK_IDENTIFICADOR '=' expression { $$ = asd_new($2, 0); asd_add_child($$, asd_new($1, 0)); asd_add_child($$, $3); }
+assignment: TK_IDENTIFICADOR '=' expression 
+{
+     $$ = asd_new($2, 0); printf("%d assigned\n ", counter); 
+     asd_add_child($$, asd_new($1, 0)); 
+     asd_add_child($$, $3); }
     ;
 
 function_call: TK_IDENTIFICADOR '(' expression_list ')' { $$ = asd_new($1, ARVORE_CALL); asd_add_child($$, $3); }

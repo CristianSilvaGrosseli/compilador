@@ -11,7 +11,7 @@ parser.tab.c parser.tab.h: parser.y
 	bison -d parser.y --report-file=report-file.txt
 
 clean:
-	rm -rf lex.yy.* parser.tab.* main.o asd.o etapa3
+	rm -rf lex.yy.* parser.tab.* main.o asd.o etapa3 *.dot
 
 entrega:
 	tar cvzf etapa3.tgz asd.c asd.h main.c Makefile parser.y scanner.l

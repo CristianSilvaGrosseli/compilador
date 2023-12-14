@@ -29,7 +29,7 @@ return                  { return TK_PR_RETURN; }
 \/                      { return yytext[0]; }
 %                       { return yytext[0]; }
 \<                      { return yytext[0]; }
-=                       { return yytext[0]; }
+=                       { yylval.valor_lexico = lexical_value_create(OPERATOR, yytext); return yytext[0]; }
 >                       {  return yytext[0]; }
 \{                      {  return yytext[0]; }
 \}                      {  return yytext[0]; }

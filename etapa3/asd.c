@@ -112,14 +112,24 @@ static void _print_tree (FILE *foutput, asd_tree_t *node, int depth)
   }
 }
 
-static void _asd_print_graphviz (FILE *foutput, asd_tree_t *tree)
+static void _asd_print_graphviz_addresses(FILE *foutput, asd_tree_t *tree)
+{
+  int i;
+  if (tree != NULL){
+    for (i = 0; i < tree->number_of_children; i++){
+      fprintf(foutput, "  %ld -> %ld;\n", (long)tree, (long)tree->children[i]);
+      _asd_print_graphviz_addresses(foutput, tree->children[i]);
+    }
+  }
+}
+
+static void _asd_print_graphviz_labels(FILE *foutput, asd_tree_t *tree)
 {
   int i;
   if (tree != NULL){
     fprintf(foutput, "  %ld [ label=\"%s\" ];\n", (long)tree, tree->label->token_value);
     for (i = 0; i < tree->number_of_children; i++){
-      fprintf(foutput, "  %ld -> %ld;\n", (long)tree, (long)tree->children[i]);
-      _asd_print_graphviz(foutput, tree->children[i]);
+      _asd_print_graphviz_labels(foutput, tree->children[i]);
     }
   }
 }
@@ -132,7 +142,8 @@ void asd_print_graphviz(asd_tree_t *tree)
   }
   if (tree != NULL){
     fprintf(foutput, "digraph grafo {\n");
-    _asd_print_graphviz(foutput, tree);
+    _asd_print_graphviz_addresses(foutput, tree);
+    _asd_print_graphviz_labels(foutput, tree);
     fprintf(foutput, "}\n");
     fclose(foutput);
   }

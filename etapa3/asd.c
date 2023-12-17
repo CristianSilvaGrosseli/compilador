@@ -139,7 +139,9 @@ static void _asd_print_graphviz_labels(FILE *foutput, asd_tree_t *tree)
     {
       arvore_label = tree->label->token_value;
     }
+    
     fprintf(foutput, "  %ld [ label=\"%s\" ];\n", (long)tree, arvore_label);
+
     for (i = 0; i < tree->number_of_children; i++){
       _asd_print_graphviz_labels(foutput, tree->children[i]);
     }
@@ -152,14 +154,22 @@ void asd_print_graphviz(asd_tree_t *tree)
   if(foutput == NULL){
     printf("Erro: %s não pude abrir o arquivo [%s] para escrita.\n", __FUNCTION__, ARQUIVO_SAIDA);
   }
+
+  fprintf(foutput, "digraph grafo {\n");
+  fprintf(foutput, "label=\"Ref\";\n");
+
   if (tree != NULL){
-    fprintf(foutput, "digraph grafo {\n");
+
     _asd_print_graphviz_addresses(foutput, tree);
     _asd_print_graphviz_labels(foutput, tree);
-    fprintf(foutput, "}\n");
-    fclose(foutput);
+
   }
+  fprintf(foutput, "}\n");
+  fclose(foutput);
+
+
 }
+
 
 lexical_value_t* lexical_value_create(int token_type, char* token_value)
 {

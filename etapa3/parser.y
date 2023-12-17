@@ -125,13 +125,13 @@ parameter_list: tupla_tipo_parametro {$$=$1;}
 
 
 
-global_declaration: variable_declaration ';' { $$ = $1; }
+global_declaration: variable_declaration ';' { $$ = NULL; }
     ;
 
-local_declaration: variable_declaration { $$ = $1; }
+local_declaration: variable_declaration { $$ = NULL; }
     ;
 
-variable_declaration: type identifier_list { $$ = $2; }
+variable_declaration: type identifier_list { $$ = NULL; }
     ;
 
 type: TK_PR_INT { $$ = $1; }

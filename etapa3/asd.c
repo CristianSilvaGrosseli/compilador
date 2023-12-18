@@ -2,9 +2,6 @@
 // Cristian Silva Grosseli - 00243693
 // Iuri Mendonça Tinti - 00278043
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include "asd.h"
 #include "helpers.h"
 
@@ -73,7 +70,7 @@ static void _print_node (FILE *foutput, asd_tree_t* node, int depth)
     arvore_label = node->label->token_value;
   }
   fprintf(foutput, "%p [label=\"%s\"];\n", node, arvore_label);
-  
+
   int i;
   for (i = 0; i < node->number_of_children; i++){
     _print_node(foutput, node->children[i], depth+1);
@@ -139,7 +136,7 @@ static void _asd_print_graphviz_labels(FILE *foutput, asd_tree_t *tree)
     {
       arvore_label = tree->label->token_value;
     }
-    
+
     fprintf(foutput, "  %ld [ label=\"%s\" ];\n", (long)tree, arvore_label);
 
     for (i = 0; i < tree->number_of_children; i++){

@@ -1,4 +1,15 @@
+// Entrega 4
+// Cristian Silva Grosseli - 00243693
+// Iuri Mendonça Tinti - 00278043
 
+#pragma once
+#ifndef _TABELA_H_
+#define _TABELA_H_
+
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "asd.h"
 
 /* Estrutura representando cada entrada de uma tabela, implementada como uma lista simplesmente encadeada. */
 typedef struct table
@@ -19,3 +30,5 @@ typedef struct table_list
 
 void push_table(TableList** list, Table* new_table);
 void pop_table(TableList** list);
+
+#endif //_TABELA_H_

@@ -1,5 +1,8 @@
+// Entrega 4
+// Cristian Silva Grosseli - 00243693
+// Iuri Mendonça Tinti - 00278043
+
 #include "table.h"
-#include <stdlib.h>
 
 void push_table(TableList** list, Table* new_table)
 {

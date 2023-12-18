@@ -6,12 +6,16 @@
 #ifndef _ARVORE_H_
 #define _ARVORE_H_
 
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 #define LITERAL 0
 #define IDENTIFIER 1
 #define TYPE 2
 #define CONTROL 3
-#define OPERATOR 4 
-#define EXPRESSION  5 
+#define OPERATOR 4
+#define EXPRESSION  5
 
 #define ARVORE_CALL 1
 

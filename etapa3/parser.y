@@ -79,7 +79,7 @@ int counter=0;
 %type<nodo> precedence_3
 %type<nodo> precedence_2
 %type<nodo> precedence_1
-%type<nodo> literal 
+%type<nodo> literal
 
 %define parse.error verbose
 
@@ -87,20 +87,20 @@ int counter=0;
 
 %%
 
-program: %empty { $$ = NULL; arvore = NULL;} 
+program: %empty { $$ = NULL; arvore = NULL;}
     | list  {  $$ = $1; arvore = $$; }
     ;
 
 
 list: element list  { if ($1 != NULL  && $2 !=NULL){
-                         $$ = $1; 
+                         $$ = $1;
                          asd_add_child($$, $2);
-                         } 
-                        else if ($1 != NULL ) 
-                            { $$ = $1; } 
+                         }
+                        else if ($1 != NULL )
+                            { $$ = $1; }
                           else if ($2 != NULL)
                             { $$ = $2; }
-                            else{ $$ = NULL;} 
+                            else{ $$ = NULL;}
                         }
     | element { $$ = $1; }
     ;
@@ -147,7 +147,7 @@ command_list: simple_command ';' command_list {
         if($1 == NULL) {
             $$ = $3;
         }
-        else{ 
+        else{
             asd_add_child($1, $3);;
             $$ = $1;
         }
@@ -164,13 +164,11 @@ simple_command: local_declaration { $$ = $1; }
     | command_block { $$ = $1; }
     ;
 
-assignment: TK_IDENTIFICADOR '=' expression 
+assignment: TK_IDENTIFICADOR '=' expression
 {
-     $$ = asd_new($2, 0); printf("assignment-=: %s\n ", $$->label->token_value);
-     asd_add_child($$, asd_new($1, 0)); printf("assignment-TK_IDENTIFICADOR: %s\n ", $$->children[0]->label->token_value);
-     printf("assignment-TK_IDENTIFICADOR: %d\n ", $$->children[0]->label->token_type);
-     asd_add_child($$, $3); printf("assignment-expression: %s\n ", $$->children[1]->label->token_value);
-     printf("assignment-expression: %d\n ", $$->children[1]->label->token_type);
+     $$ = asd_new($2, 0);
+     asd_add_child($$, asd_new($1, 0));
+     asd_add_child($$, $3);
 }
     ;
 

@@ -157,17 +157,12 @@ void asd_print_graphviz(asd_tree_t *tree)
 
   fprintf(foutput, "digraph grafo {\n");
   fprintf(foutput, "label=\"Ref\";\n");
-
   if (tree != NULL){
-
     _asd_print_graphviz_addresses(foutput, tree);
     _asd_print_graphviz_labels(foutput, tree);
-
   }
   fprintf(foutput, "}\n");
   fclose(foutput);
-
-
 }
 
 

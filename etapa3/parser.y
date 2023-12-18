@@ -106,7 +106,7 @@ list: element list  { if ($1 != NULL  && $2 !=NULL){
     ;
 
 element: function_definition { $$ = $1; }
-    | global_declaration { $$ = NULL; }
+    | global_declaration { $$ = $1; }
     ;
 
 function_definition: '(' parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = asd_new($7, 0); if($8!=NULL){ asd_add_child($$,$8);} }
@@ -115,14 +115,10 @@ function_definition: '(' parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR c
 function_definition: '(' ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = asd_new($6, 0); if($7!=NULL){ asd_add_child($$,$7);} }
     ;
 
-
 tupla_tipo_parametro: type TK_IDENTIFICADOR {$$ = asd_new($2, 0);};
-
 
 parameter_list: tupla_tipo_parametro {$$=$1;}
     | parameter_list ',' tupla_tipo_parametro { $$ = $1; asd_add_child($$, $3); };
-
-
 
 
 global_declaration: variable_declaration ';' { $$ = NULL; }
@@ -140,15 +136,14 @@ type: TK_PR_INT { $$ = $1; }
     ;
 
 identifier_list: TK_IDENTIFICADOR  { $$ = NULL;}
-    | identifier_list ',' TK_IDENTIFICADOR { if ($1 != NULL) { $$ = $1; asd_add_child($$, asd_new($3, 0)); } else { $$ = asd_new($3, 0); } }
+    | identifier_list ',' TK_IDENTIFICADOR { $$ = NULL; }
     ;
 
-command_block: '{' '}' {$$ = NULL; } 
+command_block: '{' '}' { $$ = NULL; }
     | '{' command_list '}' { $$ = $2; }
     ;
 
 command_list: simple_command ';' command_list {
-
         if($1 == NULL) {
             $$ = $3;
         }
@@ -171,9 +166,12 @@ simple_command: local_declaration { $$ = $1; }
 
 assignment: TK_IDENTIFICADOR '=' expression 
 {
-     $$ = asd_new($2, 0); printf("%d assigned\n ", counter); 
-     asd_add_child($$, asd_new($1, 0)); 
-     asd_add_child($$, $3); }
+     $$ = asd_new($2, 0); printf("assignment-=: %s\n ", $$->label->token_value);
+     asd_add_child($$, asd_new($1, 0)); printf("assignment-TK_IDENTIFICADOR: %s\n ", $$->children[0]->label->token_value);
+     printf("assignment-TK_IDENTIFICADOR: %d\n ", $$->children[0]->label->token_type);
+     asd_add_child($$, $3); printf("assignment-expression: %s\n ", $$->children[1]->label->token_value);
+     printf("assignment-expression: %d\n ", $$->children[1]->label->token_type);
+}
     ;
 
 function_call: TK_IDENTIFICADOR '(' expression_list ')' { $$ = asd_new($1, ARVORE_CALL); asd_add_child($$, $3); }
@@ -186,15 +184,16 @@ return_command: TK_PR_RETURN expression { $$ = asd_new($1, 0); asd_add_child($$,
 conditional_if: TK_PR_IF '(' expression ')' command_block { $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$,$5); }
     ;
 
-conditional_else: TK_PR_ELSE command_block { $$ = asd_new($1, 0); asd_add_child($$,$2); }
+conditional_else: TK_PR_ELSE command_block { $$ =  $2; }
     | %empty { $$ = NULL; }
     ;
 
 iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$, $5); }
     ;
 
-expression_list: expression { $$ = $1 ; }
-    | expression  ',' expression_list {$$ = $1; asd_add_child($$, $3);}
+expression_list: expression  ',' expression_list { if ($1 != NULL) { $$ = $1; asd_add_child($$, $3); } else { $$ = $3; } }
+    | expression { $$ = $1 ; }
+    | %empty { $$ = NULL; }
     ;
 
 expression: precedence_6 {$$=$1;}

@@ -6,10 +6,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "asd.h"
+#include "table.h"
 
 int yylex(void);
 int yyerror (char const *mensagem);
 extern void* arvore;
+TableList* global_table_list = NULL;
+Table* global_table = NULL;
 int get_line_number();
 int counter=0;
 %}
@@ -83,12 +86,16 @@ int counter=0;
 
 %define parse.error verbose
 
-%start program;
+%start program_begin;
 
 %%
 
-program: %empty { $$ = NULL; arvore = NULL;}
-    | list  {  $$ = $1; arvore = $$; }
+push_table_scope: %empty { push_table(&global_table_list, global_table); }
+
+program_begin: push_table_scope program
+
+program: %empty { $$ = NULL; arvore = NULL; }
+    | list  {  $$ = $1; arvore = $$; pop_table(&global_table_list); }
     ;
 
 
@@ -109,10 +116,10 @@ element: function_definition { $$ = $1; }
     | global_declaration { $$ = $1; }
     ;
 
-function_definition: '(' parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = asd_new($7, 0); if($8!=NULL){ asd_add_child($$,$8);} }
+function_definition: '(' push_table_scope parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = asd_new($8, 0); asd_add_child($$,$9); }
     ;
 
-function_definition: '(' ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = asd_new($6, 0); if($7!=NULL){ asd_add_child($$,$7);} }
+function_definition: '(' push_table_scope ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = asd_new($7, 0); asd_add_child($$,$8); }
     ;
 
 tupla_tipo_parametro: type TK_IDENTIFICADOR {$$ = asd_new($2, 0);};
@@ -139,20 +146,21 @@ identifier_list: TK_IDENTIFICADOR  { $$ = NULL;}
     | identifier_list ',' TK_IDENTIFICADOR { $$ = NULL; }
     ;
 
-command_block: '{' '}' { $$ = NULL; }
-    | '{' command_list '}' { $$ = $2; }
+command_block: '{' '}' { pop_table(&global_table_list); $$ = NULL; }
+    | '{' command_list '}' { pop_table(&global_table_list); $$ = $2; }
     ;
 
-command_list: simple_command ';' command_list {
-        if($1 == NULL) {
-            $$ = $3;
+command_list: push_table_scope simple_command ';' command_list {
+        if($2 == NULL) {
+            $$ = $4;
         }
-        else{
-            asd_add_child($1, $3);;
-            $$ = $1;
+        else
+        {
+            $$ = $2;
+            asd_add_child($$, $4);
         }
     }
-    | simple_command ';' {$$ = $1;}
+    | push_table_scope simple_command ';' {$$ = $2;}
     ;
 
 simple_command: local_declaration { $$ = $1; }
@@ -179,19 +187,19 @@ function_call: TK_IDENTIFICADOR '(' expression_list ')' { $$ = asd_new($1, ARVOR
 return_command: TK_PR_RETURN expression { $$ = asd_new($1, 0); asd_add_child($$, $2); }
     ;
 
-conditional_if: TK_PR_IF '(' expression ')' command_block { $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$,$5); }
+conditional_if: TK_PR_IF '(' expression ')' push_table_scope command_block { $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$,$6); }
     ;
 
-conditional_else: TK_PR_ELSE command_block { $$ =  $2; }
+conditional_else: TK_PR_ELSE push_table_scope command_block { $$ =  $3; }
     | %empty { $$ = NULL; }
     ;
 
-iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$, $5); }
+iteration: TK_PR_WHILE '(' expression ')' push_table_scope command_block { $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$, $6); }
     ;
 
 expression_list: expression  ',' expression_list { if ($1 != NULL) { $$ = $1; asd_add_child($$, $3); } else { $$ = $3; } }
     | expression { $$ = $1 ; }
-    | %empty { $$ = NULL; }
+    | %empty { $$ = NULL; /* causando um shift reduce. Remover, mas refazer os testes */ }
     ;
 
 expression: precedence_6 {$$=$1;}

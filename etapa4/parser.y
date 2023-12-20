@@ -90,7 +90,11 @@ int counter=0;
 
 %%
 
-push_table_scope: %empty { push_table(&global_table_list, global_table); }
+push_table_scope: %empty { push_table(&global_table_list, global_table); 
+printf("push_table_scope. counter = %d\n", ++counter);
+print_table_list(&global_table_list);
+}
+
 
 program_begin: push_table_scope program
 

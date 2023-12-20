@@ -25,3 +25,23 @@ void pop_table(TableList** list)
 
     free(front_node);
 }
+
+void print_table_list(TableList** list){
+
+    printf("entrou na print table\n");
+
+    TableList* atual =  *list;
+
+    while(atual != NULL){
+
+        printf("entrou no while \n");
+
+        //ESTA DANDO SEGMENTATION FAULT A PARTIR DESTE PONTO:
+        printf("token_value: %s\n", atual->symbol_table->info->token_value);
+        printf("token_type: %d\n" , atual->symbol_table->info->token_type);
+        printf("token_line: %d\n", atual->symbol_table->info->token_line);
+
+        atual = atual->next;
+    }
+
+}

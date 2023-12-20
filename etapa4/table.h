@@ -37,6 +37,10 @@ void push_table(TableList** list, Table* new_table);
 void pop_table(TableList** list);
 void insert_entry_to_table(TableList* list, lexical_value_t* lexical_value);
 void check_err_declared(TableList* list, lexical_value_t* lexical_value);
+void check_err_undeclared(TableList* list, lexical_value_t* lexical_value);
+void check_err_variable(TableList* list, lexical_value_t* lexical_value);
+void check_err_function(TableList* list, lexical_value_t* lexical_value);
+lexical_value_t* find_table_symbol(TableList* list, lexical_value_t* lexical_value);
 void print_table_list(TableList** list);
 
 

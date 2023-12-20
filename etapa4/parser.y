@@ -206,14 +206,26 @@ simple_command: local_declaration { $$ = $1; }
 
 assignment: TK_IDENTIFICADOR '=' expression
 {
-     $$ = asd_new($2, 0);
-     asd_add_child($$, asd_new($1, 0));
-     asd_add_child($$, $3);
+    check_err_undeclared(global_table_list, $1);
+    check_err_function(global_table_list, $1);
+    $$ = asd_new($2, 0);
+    asd_add_child($$, asd_new($1, 0));
+    asd_add_child($$, $3);
 }
     ;
 
-function_call: TK_IDENTIFICADOR '(' expression_list ')' { $$ = asd_new($1, ARVORE_CALL); asd_add_child($$, $3); }
-    | TK_IDENTIFICADOR '(' ')'  { $$ = asd_new($1, ARVORE_CALL); }
+function_call: TK_IDENTIFICADOR '(' expression_list ')'
+{
+    check_err_undeclared(global_table_list, $1);
+    check_err_variable(global_table_list, $1);
+    $$ = asd_new($1, ARVORE_CALL); asd_add_child($$, $3);
+}
+    | TK_IDENTIFICADOR '(' ')'
+{
+    check_err_undeclared(global_table_list, $1);
+    check_err_variable(global_table_list, $1);
+    $$ = asd_new($1, ARVORE_CALL);
+}
     ;
 
 return_command: TK_PR_RETURN expression { $$ = asd_new($1, 0); asd_add_child($$, $2); }
@@ -268,7 +280,7 @@ precedence_2: precedence_1 {$$=$1;}
 precedence_1: '(' expression ')' {$$=$2;}
     | '!' precedence_1  { $$ = asd_new($1, 0); asd_add_child($$, $2); };
     | '-' precedence_1  { $$ = asd_new($1, 0); asd_add_child($$, $2); };
-    | TK_IDENTIFICADOR  { $$ = asd_new($1, 0); };
+    | TK_IDENTIFICADOR  { check_err_undeclared(global_table_list, $1); check_err_function(global_table_list, $1); $$ = asd_new($1, 0); };
     | literal           { $$ = $1; };
     | function_call     { $$ = $1; };
     ;

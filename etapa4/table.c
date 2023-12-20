@@ -63,8 +63,53 @@ void insert_entry_to_table(TableList* list, lexical_value_t* lexical_value)
 
 void check_err_declared(TableList* list, lexical_value_t* lexical_value)
 {
-    TableList* current_list = list;
+    lexical_value_t* symbol_found = find_table_symbol(list, lexical_value);
+    if (symbol_found != NULL)
+    {
+        printf("ERRO DE SEMANTICA - LINHA %d - REDECLARACAO DO IDENTIFICADOR '%s'\n", lexical_value->token_line, lexical_value->token_value);
+        exit(ERR_DECLARED);
+    }
+}
 
+void check_err_undeclared(TableList* list, lexical_value_t* lexical_value)
+{
+    lexical_value_t* symbol_found = find_table_symbol(list, lexical_value);
+    if (symbol_found == NULL)
+    {
+        printf("ERRO DE SEMANTICA - LINHA %d - IDENTIFICADOR '%s' NAO DECLARADO\n", lexical_value->token_line, lexical_value->token_value);
+        exit(ERR_UNDECLARED);
+    }
+}
+
+void check_err_variable(TableList* list, lexical_value_t* lexical_value)
+{
+    lexical_value_t* symbol_found = find_table_symbol(list, lexical_value);
+    if (symbol_found != NULL)
+    {
+        if (symbol_found->token_nature != TOKEN_NATURE_FUNCTION)
+        {
+            printf("ERRO DE SEMANTICA - LINHA %d - VARIAVEL '%s' SENDO INVOCADA COMO FUNCAO\n", lexical_value->token_line, lexical_value->token_value);
+            exit(ERR_VARIABLE);
+        }
+    }
+}
+
+void check_err_function(TableList* list, lexical_value_t* lexical_value)
+{
+    lexical_value_t* symbol_found = find_table_symbol(list, lexical_value);
+    if (symbol_found != NULL)
+    {
+        if (symbol_found->token_nature != TOKEN_NATURE_VARIABLE)
+        {
+            printf("ERRO DE SEMANTICA - LINHA %d - FUNCTION '%s' SENDO USADA COMO VARIAVEL\n", lexical_value->token_line, lexical_value->token_value);
+            exit(ERR_FUNCTION);
+        }
+    }
+}
+
+lexical_value_t* find_table_symbol(TableList* list, lexical_value_t* lexical_value)
+{
+    TableList* current_list = list;
     while(current_list->next != NULL)
     {
         Table* current_table = current_list->symbol_table;
@@ -72,13 +117,13 @@ void check_err_declared(TableList* list, lexical_value_t* lexical_value)
         {
             if (strcmp(lexical_value->token_value, current_table->info->token_value) == 0)
             {
-                printf("ERRO DE SEMANTICA - LINHA %d - REDECLARACAO DO IDENTIFICADOR '%s'\n", lexical_value->token_line, lexical_value->token_value);
-                exit(ERR_DECLARED);
+                return current_table->info;
             }
             current_table = current_table->next;
         }
         current_list = current_list->next;
     }
+    return NULL;
 }
 
 void print_table_list(TableList** list)

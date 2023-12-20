@@ -17,13 +17,18 @@ void push_table(TableList** list, Table* new_table)
 
 void pop_table(TableList** list)
 {
+
     TableList* front_node = (*list);
 
     TableList* new_front_node = front_node->next;
-    new_front_node->previous = NULL;
+
+    if( new_front_node != NULL)
+        {new_front_node->previous = NULL;}
+
     (*list) = new_front_node;
 
     free(front_node);
+
 }
 
 void insert_entry_to_table(TableList* list, lexical_value_t* lexical_value)

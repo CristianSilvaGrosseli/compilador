@@ -31,5 +31,7 @@ typedef struct table_list
 void push_table(TableList** list, Table* new_table);
 void pop_table(TableList** list);
 void insert_entry_to_table(Table** table, lexical_value_t* lexical_value);
+void print_table_list(TableList** list);
+
 
 #endif //_TABELA_H_

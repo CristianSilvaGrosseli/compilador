@@ -30,5 +30,7 @@ typedef struct table_list
 
 void push_table(TableList** list, Table* new_table);
 void pop_table(TableList** list);
+void print_table_list(TableList** list);
+
 
 #endif //_TABELA_H_

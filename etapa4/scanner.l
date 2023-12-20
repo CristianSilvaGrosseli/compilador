@@ -48,7 +48,7 @@ return                  { yylval.valor_lexico = lexical_value_create(CONTROL, yy
 
 false                   { yylval.valor_lexico = lexical_value_create(LITERAL, yytext);  return TK_LIT_FALSE; }
 true                    { yylval.valor_lexico = lexical_value_create(LITERAL, yytext);  return TK_LIT_TRUE; }
-(_|[a-z])[_a-z0-9]*	    { yylval.valor_lexico = lexical_value_create(IDENTIFIER, yytext);  return TK_IDENTIFICADOR; }
+(_|[a-z])[_a-z0-9]*     { yylval.valor_lexico = lexical_value_create(IDENTIFIER, yytext);  return TK_IDENTIFICADOR; }
 [0-9]+                  { yylval.valor_lexico = lexical_value_create(LITERAL, yytext);  return TK_LIT_INT; }
 [0-9]*(\.[0-9])[0-9]*   { yylval.valor_lexico = lexical_value_create(LITERAL, yytext);  return TK_LIT_FLOAT; }
 

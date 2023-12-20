@@ -17,13 +17,18 @@
 #define OPERATOR 4
 #define EXPRESSION  5
 
+#define TOKEN_NATURE_LITERAL 1
+#define TOKEN_NATURE_IDENTIFIER 2
+#define TOKEN_NATURE_FUNCTION 3
+
 #define ARVORE_CALL 1
 
 typedef struct lexical_value
 {
-	int token_line;
-	char* token_value;
-	int token_type;
+    int token_line;
+    char* token_value;
+    int token_type;
+    int token_nature;
 } lexical_value_t;
 
 typedef struct asd_tree {

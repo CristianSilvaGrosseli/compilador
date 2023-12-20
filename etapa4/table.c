@@ -25,3 +25,29 @@ void pop_table(TableList** list)
 
     free(front_node);
 }
+
+void insert_entry_to_table(Table** table, lexical_value_t* lexical_value)
+{
+    Table* new_table = (Table*)malloc(sizeof(Table));
+    new_table->info = (lexical_value_t*)malloc(sizeof(lexical_value_t));
+
+    new_table->info->token_value = strdup(lexical_value->token_value);
+    new_table->info->token_line = lexical_value->token_line;
+    new_table->info->token_type = lexical_value->token_type;
+    new_table->info->token_nature = lexical_value->token_nature;
+    new_table->next = NULL;
+
+    if (*table == NULL)
+    {
+        *table = new_table;
+    }
+    else
+    {
+        Table* current_table = *table;
+        while (current_table->next != NULL)
+        {
+            current_table = current_table->next;
+        }
+        current_table->next = new_table;
+    }
+}

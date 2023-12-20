@@ -52,22 +52,20 @@ void insert_entry_to_table(Table** table, lexical_value_t* lexical_value)
     }
 }
 
-void print_table_list(TableList** list)
+void print_table(Table* list)
 {
-    // printf("entrou na print table\n");
+    printf("print_table()\n");
 
-    // TableList* atual =  *list;
+    Table* atual =  list;
 
-    // while(atual != NULL)
-    // {
+    while(atual != NULL)
+    {
 
-    //     printf("entrou no while \n");
-
-    //     //ESTA DANDO SEGMENTATION FAULT A PARTIR DESTE PONTO:
-    //     printf("token_value: %s\n", atual->symbol_table->info->token_value);
-    //     printf("token_type: %d\n" , atual->symbol_table->info->token_type);
-    //     printf("token_line: %d\n", atual->symbol_table->info->token_line);
-
-    //     atual = atual->next;
-    // }
+        printf("token_value: %s\n", atual->info->token_value);
+        printf("token_nature: %d\n", atual->info->token_nature);
+        printf("token_type: %d\n" , atual->info->token_type);
+        printf("token_line: %d\n\n", atual->info->token_line);
+    
+        atual = atual->next;
+    }
 }

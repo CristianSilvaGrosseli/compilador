@@ -13,6 +13,7 @@ int yyerror (char const *mensagem);
 extern void* arvore;
 TableList* global_table_list = NULL;
 Table* global_table = NULL;
+TableList* table_list;
 int get_line_number();
 int counter=0;
 int current_type = -1;
@@ -91,7 +92,7 @@ int current_type = -1;
 
 %%
 
-push_table_scope: %empty { push_table(&global_table_list, global_table); 
+push_table_scope: %empty { push_table(&global_table_list, global_table);
 printf("push_table_scope. counter = %d\n", ++counter);
 print_table_list(&global_table_list);
 }
@@ -124,7 +125,7 @@ element: function_definition { $$ = $1; }
 function_definition: '(' push_table_scope parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block
 {
     $8->token_nature = TOKEN_NATURE_FUNCTION;
-    insert_entry_to_table(&global_table, $8);
+    insert_entry_to_table(global_table_list, $8);
     $$ = asd_new($8, 0); asd_add_child($$,$9);
 }
     ;
@@ -133,7 +134,7 @@ function_definition: '(' push_table_scope ')' TK_OC_GE type '!' TK_IDENTIFICADOR
 {
     $7->token_type = current_type;
     $7->token_nature = TOKEN_NATURE_FUNCTION;
-    insert_entry_to_table(&global_table, $7);
+    insert_entry_to_table(global_table_list, $7);
     $$ = asd_new($7, 0); asd_add_child($$,$8);
 }
     ;
@@ -165,14 +166,14 @@ identifier_list: TK_IDENTIFICADOR
 {
     $1->token_type = current_type;
     $1->token_nature = TOKEN_NATURE_IDENTIFIER;
-    insert_entry_to_table(&global_table, $1);
+    insert_entry_to_table(global_table_list, $1);
     $$ = NULL;
 }
     | identifier_list ',' TK_IDENTIFICADOR
 {
     $3->token_type = current_type;
     $3->token_nature = TOKEN_NATURE_IDENTIFIER;
-    insert_entry_to_table(&global_table, $3);
+    insert_entry_to_table(global_table_list, $3);
     $$ = NULL;
 }
     ;

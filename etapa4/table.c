@@ -26,8 +26,10 @@ void pop_table(TableList** list)
     free(front_node);
 }
 
-void insert_entry_to_table(Table** table, lexical_value_t* lexical_value)
+void insert_entry_to_table(TableList* list, lexical_value_t* lexical_value)
 {
+    check_err_declared(list, lexical_value);
+
     Table* new_table = (Table*)malloc(sizeof(Table));
     new_table->info = (lexical_value_t*)malloc(sizeof(lexical_value_t));
 
@@ -37,13 +39,15 @@ void insert_entry_to_table(Table** table, lexical_value_t* lexical_value)
     new_table->info->token_nature = lexical_value->token_nature;
     new_table->next = NULL;
 
-    if (*table == NULL)
+    Table* table = list->symbol_table;
+
+    if (table == NULL)
     {
-        *table = new_table;
+        table = new_table;
     }
     else
     {
-        Table* current_table = *table;
+        Table* current_table = table;
         while (current_table->next != NULL)
         {
             current_table = current_table->next;
@@ -52,20 +56,47 @@ void insert_entry_to_table(Table** table, lexical_value_t* lexical_value)
     }
 }
 
-void print_table(Table* list)
+void check_err_declared(TableList* list, lexical_value_t* lexical_value)
+{
+    TableList* current_list = list;
+
+    while(current_list->next != NULL)
+    {
+        Table* current_table = current_list->symbol_table;
+        while (current_table->next != NULL)
+        {
+            if (strcmp(lexical_value->token_value, current_table->info->token_value) == 0)
+            {
+                printf("ERRO DE SEMANTICA - LINHA %d - REDECLARACAO DO IDENTIFICADOR '%s'\n", lexical_value->token_line, lexical_value->token_value);
+                exit(ERR_DECLARED);
+            }
+            current_table = current_table->next;
+        }
+        current_list = current_list->next;
+    }
+}
+
+void print_table_list(TableList** list)
 {
     printf("print_table()\n");
+    TableList* current_list = *list;
+    int list_number = 0;
+    int table_number = 0;
 
-    Table* atual =  list;
-
-    while(atual != NULL)
+    while(current_list->next != NULL)
     {
+        printf("list: %d\n", ++list_number);
+        Table* current_table = current_list->symbol_table;
+        while (current_table->next != NULL)
+        {
+            printf("table: %d\n", ++table_number);
+            printf("token_value: %s\n", current_table->info->token_value);
+            printf("token_nature: %d\n", current_table->info->token_nature);
+            printf("token_type: %d\n" , current_table->info->token_type);
+            printf("token_line: %d\n\n", current_table->info->token_line);
 
-        printf("token_value: %s\n", atual->info->token_value);
-        printf("token_nature: %d\n", atual->info->token_nature);
-        printf("token_type: %d\n" , atual->info->token_type);
-        printf("token_line: %d\n\n", atual->info->token_line);
-    
-        atual = atual->next;
+            current_table = current_table->next;
+        }
+        current_list = current_list->next;
     }
 }

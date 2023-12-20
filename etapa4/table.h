@@ -11,6 +11,11 @@
 #include <stdio.h>
 #include "asd.h"
 
+#define ERR_UNDECLARED 10
+#define ERR_DECLARED 11
+#define ERR_VARIABLE 20
+#define ERR_FUNCTION 21
+
 /* Estrutura representando cada entrada de uma tabela, implementada como uma lista simplesmente encadeada. */
 typedef struct table
 {
@@ -30,7 +35,8 @@ typedef struct table_list
 
 void push_table(TableList** list, Table* new_table);
 void pop_table(TableList** list);
-void insert_entry_to_table(Table** table, lexical_value_t* lexical_value);
+void insert_entry_to_table(TableList* list, lexical_value_t* lexical_value);
+void check_err_declared(TableList* list, lexical_value_t* lexical_value);
 void print_table_list(TableList** list);
 
 

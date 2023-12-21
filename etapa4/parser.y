@@ -1,5 +1,5 @@
 %{
-// Entrega 3
+// Entrega 4
 // Cristian Silva Grosseli - 00243693
 // Iuri Mendonça Tinti - 00278043
 
@@ -206,11 +206,12 @@ simple_command: local_declaration { $$ = $1; }
 
 assignment: TK_IDENTIFICADOR '=' expression
 {
-    check_err_undeclared(global_table_list, $1);
-    check_err_function(global_table_list, $1);
     $$ = asd_new($2, 0);
     asd_add_child($$, asd_new($1, 0));
     asd_add_child($$, $3);
+    $1->token_type = infer_type($$);
+    check_err_undeclared(global_table_list, $1);
+    check_err_function(global_table_list, $1);
 }
     ;
 
@@ -228,17 +229,33 @@ function_call: TK_IDENTIFICADOR '(' expression_list ')'
 }
     ;
 
-return_command: TK_PR_RETURN expression { $$ = asd_new($1, 0); asd_add_child($$, $2); }
+return_command: TK_PR_RETURN expression
+{
+    $1->token_type = infer_type($2);
+    $$ = asd_new($1, 0); asd_add_child($$, $2);
+}
     ;
 
-conditional_if: TK_PR_IF '(' expression ')' push_table_scope command_block { $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$,$6); }
+conditional_if: TK_PR_IF '(' expression ')' push_table_scope command_block
+{
+    $1->token_type = infer_type($3);
+    $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$,$6);
+}
     ;
 
-conditional_else: TK_PR_ELSE push_table_scope command_block { $$ =  $3; }
+conditional_else: TK_PR_ELSE push_table_scope command_block
+{
+    $1->token_type = infer_type($3);
+    $$ =  $3;
+}
     | %empty { $$ = NULL; }
     ;
 
-iteration: TK_PR_WHILE '(' expression ')' push_table_scope command_block { $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$, $6); }
+iteration: TK_PR_WHILE '(' expression ')' push_table_scope command_block
+{
+    $1->token_type = infer_type($3);
+    $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$, $6);
+}
     ;
 
 expression_list: expression  ',' expression_list { if ($1 != NULL) { $$ = $1; asd_add_child($$, $3); } else { $$ = $3; } }

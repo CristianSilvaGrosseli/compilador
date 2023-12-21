@@ -70,7 +70,7 @@ static void _print_node (FILE *foutput, asd_tree_t* node, int depth)
     arvore_label = node->label->token_value;
   }
   fprintf(foutput, "%p [label=\"%s\"];\n", node, arvore_label);
-  
+
   int i;
   for (i = 0; i < node->number_of_children; i++){
     _print_node(foutput, node->children[i], depth+1);
@@ -136,7 +136,7 @@ static void _asd_print_graphviz_labels(FILE *foutput, asd_tree_t *tree)
     {
       arvore_label = tree->label->token_value;
     }
-    
+
     fprintf(foutput, "  %ld [ label=\"%s\" ];\n", (long)tree, arvore_label);
 
     for (i = 0; i < tree->number_of_children; i++){
@@ -163,11 +163,12 @@ void asd_print_graphviz(asd_tree_t *tree)
 }
 
 
-lexical_value_t* lexical_value_create(int token_type, char* token_value)
+lexical_value_t* lexical_value_create(int token_nature, char* token_value)
 {
   lexical_value_t* value = (lexical_value_t*) malloc(sizeof(lexical_value_t));
   value->token_line = get_line_number();
-  value->token_type = token_type;
+  value->token_type = -1;
+  value->token_nature = token_nature;
   value->token_value = strdup(token_value);
 }
 

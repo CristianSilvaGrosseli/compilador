@@ -126,6 +126,39 @@ lexical_value_t* find_table_symbol(TableList* list, lexical_value_t* lexical_val
     return NULL;
 }
 
+int infer_type(asd_tree_t* root_node)
+{
+    int infered_type = -1;
+
+    if (root_node != NULL)
+    {
+        infered_type = root_node->label->token_type;
+        for (int i = 0; i < root_node->number_of_children; i++)
+        {
+            infered_type = aux_infer_type(infered_type, root_node->children[i]->label->token_type);
+        }
+    }
+
+    return infered_type;
+}
+
+int aux_infer_type(int type1, int type2)
+{
+    if (type1 == TOKEN_TYPE_FLOAT || type2 == TOKEN_TYPE_FLOAT)
+    {
+        return TOKEN_TYPE_FLOAT;
+    }
+    if (type1 == TOKEN_TYPE_INT || type2 == TOKEN_TYPE_INT)
+    {
+        return TOKEN_TYPE_INT;
+    }
+    if (type1 == TOKEN_TYPE_BOOL || type2 == TOKEN_TYPE_BOOL)
+    {
+        return TOKEN_TYPE_BOOL;
+    }
+    return -1;
+}
+
 void print_table_list(TableList** list)
 {
     printf("print_table()\n");

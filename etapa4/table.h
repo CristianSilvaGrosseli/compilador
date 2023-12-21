@@ -40,6 +40,8 @@ void check_err_declared(TableList* list, lexical_value_t* lexical_value);
 void check_err_undeclared(TableList* list, lexical_value_t* lexical_value);
 void check_err_variable(TableList* list, lexical_value_t* lexical_value);
 void check_err_function(TableList* list, lexical_value_t* lexical_value);
+int infer_type(asd_tree_t* root_node);
+int aux_infer_type(int type1, int type2);
 lexical_value_t* find_table_symbol(TableList* list, lexical_value_t* lexical_value);
 void print_table_list(TableList** list);
 

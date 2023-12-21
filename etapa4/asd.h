@@ -10,17 +10,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define LITERAL 0
-#define IDENTIFIER 1
-#define TYPE 2
-#define CONTROL 3
-#define OPERATOR 4
-#define EXPRESSION  5
+#define TOKEN_TYPE_INT 1
+#define TOKEN_TYPE_FLOAT 2
+#define TOKEN_TYPE_BOOL 3
 
 #define TOKEN_NATURE_LITERAL 1
 #define TOKEN_NATURE_IDENTIFIER 2
 #define TOKEN_NATURE_FUNCTION 3
 #define TOKEN_NATURE_VARIABLE 4
+#define TOKEN_NATURE_TYPE 5
+#define TOKEN_NATURE_CONTROL 6
+#define TOKEN_NATURE_OPERATOR 7
+#define TOKEN_NATURE_EXPRESSION 8
 
 #define ARVORE_CALL 1
 

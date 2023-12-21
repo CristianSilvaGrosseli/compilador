@@ -109,10 +109,19 @@ void check_err_function(TableList* list, lexical_value_t* lexical_value)
 
 lexical_value_t* find_table_symbol(TableList* list, lexical_value_t* lexical_value)
 {
+ 
     TableList* current_list = list;
+  
+    if(current_list == NULL) { return NULL; }
+    
     while(current_list->next != NULL)
     {
+        
+        if(current_list->symbol_table == NULL){ current_list = current_list->next; continue; }
+
         Table* current_table = current_list->symbol_table;
+
+        
         while (current_table->next != NULL)
         {
             if (strcmp(lexical_value->token_value, current_table->info->token_value) == 0)
@@ -121,8 +130,11 @@ lexical_value_t* find_table_symbol(TableList* list, lexical_value_t* lexical_val
             }
             current_table = current_table->next;
         }
+        
         current_list = current_list->next;
+        
     }
+
     return NULL;
 }
 

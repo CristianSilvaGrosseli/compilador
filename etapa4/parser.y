@@ -92,10 +92,7 @@ int current_type = -1;
 
 %%
 
-push_table_scope: %empty { push_table(&global_table_list, global_table);
-
-
-}
+push_table_scope: %empty { push_table(&global_table_list, global_table); }
 
 
 program_begin: push_table_scope program
@@ -157,23 +154,29 @@ variable_declaration: type identifier_list
 }
     ;
 
-type: TK_PR_INT { current_type = TK_PR_INT; $$ = $1; }
-    | TK_PR_FLOAT { current_type = TK_PR_FLOAT; $$ = $1; }
-    | TK_PR_BOOL { current_type = TK_PR_BOOL;  $$ = $1; }
+type: TK_PR_INT { current_type = TOKEN_TYPE_INT; $$ = $1; }
+    | TK_PR_FLOAT { current_type = TOKEN_TYPE_FLOAT; $$ = $1; }
+    | TK_PR_BOOL { current_type = TOKEN_TYPE_BOOL;  $$ = $1; }
     ;
 
 identifier_list: TK_IDENTIFICADOR
 {
-    $1->token_type = current_type;
-    $1->token_nature = TOKEN_NATURE_IDENTIFIER;
-    insert_entry_to_table(global_table_list, $1);
+    if ($1 != NULL)
+    {
+        $1->token_type = current_type;
+        $1->token_nature = TOKEN_NATURE_IDENTIFIER;
+        insert_entry_to_table(global_table_list, $1);
+    }
     $$ = NULL;
 }
     | identifier_list ',' TK_IDENTIFICADOR
 {
-    $3->token_type = current_type;
-    $3->token_nature = TOKEN_NATURE_IDENTIFIER;
-    insert_entry_to_table(global_table_list, $3);
+    if ($3 != NULL)
+    {
+        $3->token_type = current_type;
+        $3->token_nature = TOKEN_NATURE_IDENTIFIER;
+        insert_entry_to_table(global_table_list, $3);
+    }
     $$ = NULL;
 }
     ;

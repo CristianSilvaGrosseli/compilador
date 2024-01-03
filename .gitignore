@@ -1,4 +1,8 @@
+#ignora tudo
 *
+
+#menos os arquivos abaixo, ainda que em subdiretorios
+!*/
 !E1.pdf
 !E2.pdf
 !E3.pdf

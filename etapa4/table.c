@@ -116,11 +116,9 @@ lexical_value_t* find_table_symbol(TableList* list, lexical_value_t* lexical_val
     
     while(current_list->next != NULL)
     {
-        
         if(current_list->symbol_table == NULL){ current_list = current_list->next; continue; }
 
         Table* current_table = current_list->symbol_table;
-
         
         while (current_table->next != NULL)
         {
@@ -132,7 +130,6 @@ lexical_value_t* find_table_symbol(TableList* list, lexical_value_t* lexical_val
         }
         
         current_list = current_list->next;
-        
     }
 
     return NULL;

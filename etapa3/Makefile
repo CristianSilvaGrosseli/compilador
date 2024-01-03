@@ -8,7 +8,7 @@ lex.yy.c: scanner.l
 	flex scanner.l
 
 parser.tab.c parser.tab.h: parser.y
-	bison -d parser.y --report-file=report-file.txt
+	bison -d parser.y -Wcounterexamples --report-file=report-file.txt
 
 clean:
 	rm -rf lex.yy.* parser.tab.* main.o asd.o etapa3 *.dot

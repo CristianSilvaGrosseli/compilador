@@ -191,7 +191,6 @@ iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = asd_new($1, 0); a
 
 expression_list: expression  ',' expression_list { if ($1 != NULL) { $$ = $1; asd_add_child($$, $3); } else { $$ = $3; } }
     | expression { $$ = $1 ; }
-    | %empty { $$ = NULL; }
     ;
 
 expression: precedence_6 {$$=$1;}

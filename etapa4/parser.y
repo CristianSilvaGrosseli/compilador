@@ -263,7 +263,6 @@ iteration: TK_PR_WHILE '(' expression ')' push_table_scope command_block
 
 expression_list: expression  ',' expression_list { if ($1 != NULL) { $$ = $1; asd_add_child($$, $3); } else { $$ = $3; } }
     | expression { $$ = $1 ; }
-    | %empty { $$ = NULL; /* causando um shift reduce. Remover, mas refazer os testes */ }
     ;
 
 expression: precedence_6 {$$=$1;}

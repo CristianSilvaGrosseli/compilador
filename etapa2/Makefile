@@ -1,7 +1,7 @@
 all: etapa2
 
 parser.tab.c: parser.y
-	@(bison -d parser.y)
+	@(bison -d parser.y -Wcounterexamples --report-file=report-file.txt)
 
 lex.yy.c: scanner.l
 	@(flex scanner.l)

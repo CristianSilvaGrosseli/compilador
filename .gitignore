@@ -17,3 +17,6 @@
 !asd.h
 !table.c
 !table.h
+!iloc.c
+!iloc.h
+!ilocsim.py

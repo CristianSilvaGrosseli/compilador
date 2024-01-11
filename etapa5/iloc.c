@@ -1,3 +1,8 @@
+// Entrega 5
+// Cristian Silva Grosseli - 00243693
+// Iuri Mendonça Tinti - 00278043
+
+
 // Função para criar uma nova operação ILOC
 OperacaoILOC* novaOperacaoILOC(char* operacao, char** argumentos, int num_argumentos) {
     OperacaoILOC* o = (OperacaoILOC*) malloc(sizeof(OperacaoILOC));

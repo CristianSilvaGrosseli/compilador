@@ -2,6 +2,7 @@
 // Cristian Silva Grosseli - 00243693
 // Iuri Mendonça Tinti - 00278043
 
+#include "iloc.h"
 
 // Função para criar uma nova operação ILOC
 OperacaoILOC* novaOperacaoILOC(char* operacao, char** argumentos, int num_argumentos) {

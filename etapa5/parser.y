@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "asd.h"
+#include "tad_ast.h"
 
 int yylex(void);
 int yyerror (char const *mensagem);

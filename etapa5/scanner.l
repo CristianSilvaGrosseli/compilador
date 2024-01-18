@@ -4,7 +4,7 @@
 // Iuri Mendonça Tinti - 00278043
 
 #include <stdio.h>
-#include "asd.h"
+#include "tad_ast.h"
 #include "parser.tab.h"
 %}
 

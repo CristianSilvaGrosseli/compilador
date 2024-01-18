@@ -17,7 +17,7 @@ int counter=0;
 %union
 {
 	lexical_value_t* valor_lexico;
-	asd_tree_t* nodo;
+	node_ast_tree_t* nodo;
 }
 
 %token<valor_lexico> TK_PR_INT
@@ -94,7 +94,7 @@ program: %empty { $$ = NULL; arvore = NULL;}
 
 list: element list  { if ($1 != NULL  && $2 !=NULL){
                          $$ = $1;
-                         asd_add_child($$, $2);
+                         ast_add_child($$, $2);
                          }
                         else if ($1 != NULL )
                             { $$ = $1; }
@@ -109,16 +109,16 @@ element: function_definition { $$ = $1; }
     | global_declaration { $$ = $1; }
     ;
 
-function_definition: '(' parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = asd_new($7, 0); if($8!=NULL){ asd_add_child($$,$8);} }
+function_definition: '(' parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = ast_new($7, 0); if($8!=NULL){ ast_add_child($$,$8);} }
     ;
 
-function_definition: '(' ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = asd_new($6, 0); if($7!=NULL){ asd_add_child($$,$7);} }
+function_definition: '(' ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = ast_new($6, 0); if($7!=NULL){ ast_add_child($$,$7);} }
     ;
 
-tupla_tipo_parametro: type TK_IDENTIFICADOR {$$ = asd_new($2, 0);};
+tupla_tipo_parametro: type TK_IDENTIFICADOR {$$ = ast_new($2, 0);};
 
 parameter_list: tupla_tipo_parametro {$$=$1;}
-    | parameter_list ',' tupla_tipo_parametro { $$ = $1; asd_add_child($$, $3); };
+    | parameter_list ',' tupla_tipo_parametro { $$ = $1; ast_add_child($$, $3); };
 
 
 global_declaration: variable_declaration ';' { $$ = NULL; }
@@ -148,7 +148,7 @@ command_list: simple_command ';' command_list {
             $$ = $3;
         }
         else{
-            asd_add_child($1, $3);;
+            ast_add_child($1, $3);;
             $$ = $1;
         }
     }
@@ -159,83 +159,83 @@ simple_command: local_declaration { $$ = $1; }
     | assignment { $$ = $1; }
     | function_call { $$ = $1; }
     | return_command { $$ = $1; }
-    | conditional_if conditional_else { $$ = $1; asd_add_child($$, $2); }
+    | conditional_if conditional_else { $$ = $1; ast_add_child($$, $2); }
     | iteration { $$ = $1; }
     | command_block { $$ = $1; }
     ;
 
 assignment: TK_IDENTIFICADOR '=' expression
 {
-     $$ = asd_new($2, 0);
-     asd_add_child($$, asd_new($1, 0));
-     asd_add_child($$, $3);
+     $$ = ast_new($2, 0);
+     ast_add_child($$, ast_new($1, 0));
+     ast_add_child($$, $3);
 }
     ;
 
-function_call: TK_IDENTIFICADOR '(' expression_list ')' { $$ = asd_new($1, ARVORE_CALL); asd_add_child($$, $3); }
-    | TK_IDENTIFICADOR '(' ')'  { $$ = asd_new($1, ARVORE_CALL); }
+function_call: TK_IDENTIFICADOR '(' expression_list ')' { $$ = ast_new($1, ARVORE_CALL); ast_add_child($$, $3); }
+    | TK_IDENTIFICADOR '(' ')'  { $$ = ast_new($1, ARVORE_CALL); }
     ;
 
-return_command: TK_PR_RETURN expression { $$ = asd_new($1, 0); asd_add_child($$, $2); }
+return_command: TK_PR_RETURN expression { $$ = ast_new($1, 0); ast_add_child($$, $2); }
     ;
 
-conditional_if: TK_PR_IF '(' expression ')' command_block { $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$,$5); }
+conditional_if: TK_PR_IF '(' expression ')' command_block { $$ = ast_new($1, 0); ast_add_child($$,$3); ast_add_child($$,$5); }
     ;
 
 conditional_else: TK_PR_ELSE command_block { $$ =  $2; }
     | %empty { $$ = NULL; }
     ;
 
-iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$, $5); }
+iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = ast_new($1, 0); ast_add_child($$,$3); ast_add_child($$, $5); }
     ;
 
-expression_list: expression  ',' expression_list { if ($1 != NULL) { $$ = $1; asd_add_child($$, $3); } else { $$ = $3; } }
+expression_list: expression  ',' expression_list { if ($1 != NULL) { $$ = $1; ast_add_child($$, $3); } else { $$ = $3; } }
     | expression { $$ = $1 ; }
     ;
 
 expression: precedence_6 {$$=$1;}
-    | expression TK_OC_OR precedence_6 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | expression TK_OC_OR precedence_6 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
     ;
 
 precedence_6: precedence_5                {$$=$1;}
-    | precedence_6 TK_OC_AND precedence_5 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | precedence_6 TK_OC_AND precedence_5 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
     ;
 
 precedence_5: precedence_4               {$$=$1;}
-    | precedence_5 TK_OC_EQ precedence_4 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
-    | precedence_5 TK_OC_NE precedence_4 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | precedence_5 TK_OC_EQ precedence_4 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
+    | precedence_5 TK_OC_NE precedence_4 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
     ;
 
 precedence_4: precedence_3          {$$=$1;}
-    | precedence_4 '<' precedence_3 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
-    | precedence_4 '>' precedence_3 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
-    | precedence_4 TK_OC_LE precedence_3 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
-    | precedence_4 TK_OC_GE precedence_3 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | precedence_4 '<' precedence_3 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
+    | precedence_4 '>' precedence_3 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
+    | precedence_4 TK_OC_LE precedence_3 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
+    | precedence_4 TK_OC_GE precedence_3 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
     ;
 
 precedence_3: precedence_2          {$$=$1;}
-    | precedence_3 '+' precedence_2 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
-    | precedence_3 '-' precedence_2 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | precedence_3 '+' precedence_2 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
+    | precedence_3 '-' precedence_2 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
     ;
 
 precedence_2: precedence_1 {$$=$1;}
-    | precedence_2 '*' precedence_1 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
-    | precedence_2 '/' precedence_1 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
-    | precedence_2 '%' precedence_1 { $$ = asd_new($2, 0); asd_add_child($$, $1); asd_add_child($$, $3); };
+    | precedence_2 '*' precedence_1 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
+    | precedence_2 '/' precedence_1 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
+    | precedence_2 '%' precedence_1 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
     ;
 
 precedence_1: '(' expression ')' {$$=$2;}
-    | '!' precedence_1  { $$ = asd_new($1, 0); asd_add_child($$, $2); };
-    | '-' precedence_1  { $$ = asd_new($1, 0); asd_add_child($$, $2); };
-    | TK_IDENTIFICADOR  { $$ = asd_new($1, 0); };
+    | '!' precedence_1  { $$ = ast_new($1, 0); ast_add_child($$, $2); };
+    | '-' precedence_1  { $$ = ast_new($1, 0); ast_add_child($$, $2); };
+    | TK_IDENTIFICADOR  { $$ = ast_new($1, 0); };
     | literal           { $$ = $1; };
     | function_call     { $$ = $1; };
     ;
 
-literal: TK_LIT_INT {$$ = asd_new($1, 0);}
-    | TK_LIT_FLOAT {$$ = asd_new($1, 0);}
-    | TK_LIT_FALSE {$$ = asd_new($1, 0);}
-    | TK_LIT_TRUE {$$ = asd_new($1, 0);}
+literal: TK_LIT_INT {$$ = ast_new($1, 0);}
+    | TK_LIT_FLOAT {$$ = ast_new($1, 0);}
+    | TK_LIT_FALSE {$$ = ast_new($1, 0);}
+    | TK_LIT_TRUE {$$ = ast_new($1, 0);}
     ;
 
 %%

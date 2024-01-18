@@ -13,8 +13,8 @@
 !main.c
 !scanner.l
 !parser.y
-!asd.c
-!asd.h
+!tad_ast.c
+!tad_ast.h
 !table.c
 !table.h
 !iloc.c

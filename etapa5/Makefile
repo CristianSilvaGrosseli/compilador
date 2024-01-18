@@ -6,6 +6,7 @@ lex.yy.o parser.tab.o main.o tad_ast.o iloc.o: lex.yy.c parser.tab.c tad_ast.c i
 
 lex.yy.c: scanner.l
 	flex scanner.l
+	testes
 
 parser.tab.c parser.tab.h: parser.y
 	bison -d parser.y -Wcounterexamples --report-file=report-file.txt

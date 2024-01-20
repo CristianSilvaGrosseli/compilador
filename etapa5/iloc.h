@@ -13,13 +13,16 @@ tantes, ou nomes de rótulos */ //---------->>>> FAZER O RELEASE QND LIBERAR AS 
 
 // Estrutura para representar uma operação ILOC
 typedef struct {
-    char* operacao;
-    char** argumentos;
-    int num_argumentos;
-} OperacaoILOC;
+    char* operation;
+    char** arguments;
+    int num_arguments;
+} ILOCOperation;
 
 // Estrutura para manter uma lista de operações ILOC
 typedef struct {
-    OperacaoILOC* operacoes;
-    int num_operacoes;
-} ListaOperacoesILOC;
+    ILOCOperation* operations;
+    int num_operations;
+} ILOCOperationList;
+
+
+

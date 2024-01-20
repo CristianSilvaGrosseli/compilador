@@ -7,7 +7,7 @@
 #include <string.h>
 
 /* Leve em conta que os argumentos das ope-
-rações podem ser nomes de temporários, valores cons-
+ações podem ser nomes de temporários, valores cons-
 tantes, ou nomes de rótulos */ //---------->>>> FAZER O RELEASE QND LIBERAR AS STRUCTS
 
 
@@ -25,4 +25,15 @@ typedef struct {
 } ILOCOperationList;
 
 
+// Função para criar uma nova operação ILOC
+ILOCOperation* newILOCOperation(char* operation, char** arguments, int num_arguments);
+
+// Função para adicionar uma operação à lista de operações ILOC
+void addILOCOperation(ILOCOperationList* list, ILOCOperation* operation);
+
+// Função para imprimir uma operação ILOC
+void printILOCOperation(ILOCOperation* operation);
+
+// Função para imprimir a lista de operações ILOC
+void printILOCOperationList(ILOCOperationList* list);
 

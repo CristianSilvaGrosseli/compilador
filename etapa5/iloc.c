@@ -5,16 +5,36 @@
 #include "iloc.h"
 
 // Função para criar uma nova operação ILOC
-ILOCOperation* newILOCOperation(char* operation, char** arguments, int num_arguments) {
+ILOCOperation* newILOCOperation(char* operation, char* campo_1, char* campo_2, char* campo_3) {
+
     ILOCOperation* op = (ILOCOperation*)malloc(sizeof(ILOCOperation));
-    op->operation = strdup(operation);
-    op->arguments = (char**)malloc(num_arguments * sizeof(char*));
-    for (int i = 0; i < num_arguments; i++) {
-        op->arguments[i] = strdup(arguments[i]);
-    }
-    op->num_arguments = num_arguments;
+
+    op->mnemonico = strdup(operation);
+    
+    op->campo_1 = strdup(campo_1);
+
+    if(campo_2 != NULL){ op->campo_2 = strdup(campo_2);} else { op->campo_2 = NULL; }
+
+    if(campo_3 != NULL){ op->campo_3 = strdup(campo_3);} else { op->campo_3 = NULL; }
+    
     return op;
 }
+
+
+// Função para imprimir uma operação ILOC
+void printILOCOperation(ILOCOperation* operation) {
+    
+    printf("%s ", operation->mnemonico);
+
+    printf("%s ", operation->campo_1);
+
+    if(operation->campo_2 != NULL) {printf("%s ", operation->campo_2);}
+
+    if(operation->campo_3 != NULL) {printf("%s ", operation->campo_3);}
+
+    printf("\n");
+}
+
 
 // Função para adicionar uma operação à lista de operações ILOC
 void addILOCOperation(ILOCOperationList* list, ILOCOperation* operation) {
@@ -23,14 +43,6 @@ void addILOCOperation(ILOCOperationList* list, ILOCOperation* operation) {
     list->num_operations++;
 }
 
-// Função para imprimir uma operação ILOC
-void printILOCOperation(ILOCOperation* operation) {
-    printf("%s ", operation->operation);
-    for (int i = 0; i < operation->num_arguments; i++) {
-        printf("%s ", operation->arguments[i]);
-    }
-    printf("\n");
-}
 
 // Função para imprimir a lista de operações ILOC
 void printILOCOperationList(ILOCOperationList* list) {

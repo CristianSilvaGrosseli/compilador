@@ -6,17 +6,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "tad_ast.h"
+#include "table.h"
 
 int yylex(void);
 int yyerror (char const *mensagem);
 extern void* arvore;
+TableList* global_table_list = NULL;
+Table* global_table = NULL;
 int get_line_number();
 int counter=0;
+int current_type = -1;
 %}
 
 %union
 {
-	lexical_value_t* valor_lexico;
+    lexical_value_t* valor_lexico;
 	node_ast_tree_t* nodo;
 }
 
@@ -58,10 +62,10 @@ int counter=0;
 %type<nodo> function_definition
 %type<nodo> global_declaration
 %type<nodo> parameter_list
-%type<nodo> tupla_tipo_parametro
-%type<nodo> variable_declaration
+%type<nodo> parameter_tuple
 %type<nodo> local_declaration
-%type<nodo> identifier_list
+%type<nodo> local_identifier_list
+%type<nodo> global_identifier_list
 %type<nodo> command_list
 %type<nodo> simple_command
 %type<nodo> command_block
@@ -83,12 +87,14 @@ int counter=0;
 
 %define parse.error verbose
 
-%start program;
+%start program_begin;
 
 %%
 
-program: %empty { $$ = NULL; arvore = NULL;}
-    | list  {  $$ = $1; arvore = $$; }
+program_begin: program
+
+program: %empty { $$ = NULL; arvore = NULL; }
+    | list  { $$ = $1; arvore = $$; }
     ;
 
 
@@ -109,47 +115,100 @@ element: function_definition { $$ = $1; }
     | global_declaration { $$ = $1; }
     ;
 
-function_definition: '(' parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = ast_new($7, 0); if($8!=NULL){ ast_add_child($$,$8);} }
+function_definition: '(' parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block
+{
+    $7->token_nature = TOKEN_NATURE_FUNCTION;
+    insert_symbol_to_global_scope(&global_table_list, $7);
+    $$ = ast_new($7, 0); ast_add_child($$,$8);
+}
     ;
 
-function_definition: '(' ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block { $$ = ast_new($6, 0); if($7!=NULL){ ast_add_child($$,$7);} }
+function_definition: '(' ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block
+{
+    $6->token_type = current_type;
+    $6->token_nature = TOKEN_NATURE_FUNCTION;
+    insert_symbol_to_global_scope(&global_table_list, $6);
+    $$ = ast_new($6, 0); ast_add_child($$,$7);
+}
     ;
 
-tupla_tipo_parametro: type TK_IDENTIFICADOR {$$ = ast_new($2, 0);};
+parameter_tuple: type TK_IDENTIFICADOR { $$ = ast_new($2, 0); insert_symbol_to_current_scope(&global_table_list, $2); };
 
-parameter_list: tupla_tipo_parametro {$$=$1;}
-    | parameter_list ',' tupla_tipo_parametro { $$ = $1; ast_add_child($$, $3); };
+parameter_list: parameter_tuple { $$=$1; }
+    | parameter_list ',' parameter_tuple { $$ = $1; ast_add_child($$, $3); };
 
 
-global_declaration: variable_declaration ';' { $$ = NULL; }
+global_declaration: type global_identifier_list ';' { printf("global declaration"); $$ = NULL; }
     ;
 
-local_declaration: variable_declaration { $$ = NULL; }
+local_declaration: type local_identifier_list { printf("local declaration"); $$ = NULL; }
     ;
 
-variable_declaration: type identifier_list { $$ = NULL; }
+type: TK_PR_INT { current_type = TOKEN_TYPE_INT; $$ = $1; }
+    | TK_PR_FLOAT { current_type = TOKEN_TYPE_FLOAT; $$ = $1; }
+    | TK_PR_BOOL { current_type = TOKEN_TYPE_BOOL;  $$ = $1; }
     ;
 
-type: TK_PR_INT { $$ = $1; }
-    | TK_PR_FLOAT { $$ = $1; }
-    | TK_PR_BOOL { $$ = $1; }
+global_identifier_list: TK_IDENTIFICADOR
+{
+    printf("identifier list 1");
+    if ($1 != NULL)
+    {
+        $1->token_type = current_type;
+        $1->token_nature = TOKEN_NATURE_VARIABLE;
+        insert_symbol_to_global_scope(&global_table_list, $1);
+    }
+    $$ = NULL;
+}
+    | global_identifier_list ',' TK_IDENTIFICADOR
+{
+    if ($3 != NULL)
+    {
+        printf("identifier list 2");
+        $3->token_type = current_type;
+        $3->token_nature = TOKEN_NATURE_VARIABLE;
+        insert_symbol_to_global_scope(&global_table_list, $3);
+    }
+    $$ = NULL;
+}
     ;
 
-identifier_list: TK_IDENTIFICADOR  { $$ = NULL;}
-    | identifier_list ',' TK_IDENTIFICADOR { $$ = NULL; }
+local_identifier_list: TK_IDENTIFICADOR
+{
+    printf("identifier list 1");
+    if ($1 != NULL)
+    {
+        $1->token_type = current_type;
+        $1->token_nature = TOKEN_NATURE_VARIABLE;
+        insert_symbol_to_current_scope(&global_table_list, $1);
+    }
+    $$ = NULL;
+}
+    | local_identifier_list ',' TK_IDENTIFICADOR
+{
+    if ($3 != NULL)
+    {
+        printf("identifier list 2");
+        $3->token_type = current_type;
+        $3->token_nature = TOKEN_NATURE_VARIABLE;
+        insert_symbol_to_current_scope(&global_table_list, $3);
+    }
+    $$ = NULL;
+}
     ;
 
-command_block: '{' '}' { $$ = NULL; }
-    | '{' command_list '}' { $$ = $2; }
+command_block: '{' '}' { /*pop_scope(&global_table_list);*/ $$ = NULL; }
+    | '{' command_list '}' { /*pop_scope(&global_table_list);*/ $$ = $2; }
     ;
 
 command_list: simple_command ';' command_list {
         if($1 == NULL) {
             $$ = $3;
         }
-        else{
-            ast_add_child($1, $3);;
+        else
+        {
             $$ = $1;
+            ast_add_child($$, $3);
         }
     }
     | simple_command ';' {$$ = $1;}
@@ -164,35 +223,58 @@ simple_command: local_declaration { $$ = $1; }
     | command_block { $$ = $1; }
     ;
 
-assignment: TK_IDENTIFICADOR '=' expression 
+assignment: TK_IDENTIFICADOR '=' expression
 {
-     $$ = ast_new($2, 0);
-     ast_add_child($$, ast_new($1, 0));
-     ast_add_child($$, $3);
-
-    //STORE
-    //cria_iloc()
-    //descobrir endereço do TK_IDENTIFICADOR (q é pra estar na tabela de símbolo), 
-    //calcular deslocamento e saber se é local ou global
-
+    $$ = ast_new($2, 0);
+    ast_add_child($$, ast_new($1, 0));
+    ast_add_child($$, $3);
+    $1->token_type = infer_type($$);
+    check_err_undeclared(&global_table_list, $1);
+    check_err_function(&global_table_list, $1);
 }
     ;
 
-function_call: TK_IDENTIFICADOR '(' expression_list ')' { $$ = ast_new($1, ARVORE_CALL); ast_add_child($$, $3); }
-    | TK_IDENTIFICADOR '(' ')'  { $$ = ast_new($1, ARVORE_CALL); }
+function_call: TK_IDENTIFICADOR '(' expression_list ')'
+{
+    check_err_undeclared(&global_table_list, $1);
+    check_err_variable(&global_table_list, $1);
+    $$ = ast_new($1, ARVORE_CALL); ast_add_child($$, $3);
+}
+    | TK_IDENTIFICADOR '(' ')'
+{
+    check_err_undeclared(&global_table_list, $1);
+    check_err_variable(&global_table_list, $1);
+    $$ = ast_new($1, ARVORE_CALL);
+}
     ;
 
-return_command: TK_PR_RETURN expression { $$ = ast_new($1, 0); ast_add_child($$, $2); }
+return_command: TK_PR_RETURN expression
+{
+    $1->token_type = infer_type($2);
+    $$ = ast_new($1, 0); ast_add_child($$, $2);
+}
     ;
 
-conditional_if: TK_PR_IF '(' expression ')' command_block { $$ = ast_new($1, 0); ast_add_child($$,$3); ast_add_child($$,$5); }
+conditional_if: TK_PR_IF '(' expression ')' command_block
+{
+    $1->token_type = infer_type($3);
+    $$ = ast_new($1, 0); ast_add_child($$,$3); ast_add_child($$,$5);
+}
     ;
 
-conditional_else: TK_PR_ELSE command_block { $$ =  $2; }
+conditional_else: TK_PR_ELSE command_block
+{
+    $1->token_type = infer_type($2);
+    $$ = $2;
+}
     | %empty { $$ = NULL; }
     ;
 
-iteration: TK_PR_WHILE '(' expression ')' command_block { $$ = ast_new($1, 0); ast_add_child($$,$3); ast_add_child($$, $5); }
+iteration: TK_PR_WHILE '(' expression ')' command_block
+{
+    $1->token_type = infer_type($3);
+    $$ = ast_new($1, 0); ast_add_child($$,$3); ast_add_child($$, $5);
+}
     ;
 
 expression_list: expression  ',' expression_list { if ($1 != NULL) { $$ = $1; ast_add_child($$, $3); } else { $$ = $3; } }
@@ -233,15 +315,15 @@ precedence_2: precedence_1 {$$=$1;}
 precedence_1: '(' expression ')' {$$=$2;}
     | '!' precedence_1  { $$ = ast_new($1, 0); ast_add_child($$, $2); };
     | '-' precedence_1  { $$ = ast_new($1, 0); ast_add_child($$, $2); };
-    | TK_IDENTIFICADOR  { $$ = ast_new($1, 0); };
+    | TK_IDENTIFICADOR  { check_err_undeclared(&global_table_list, $1); check_err_function(&global_table_list, $1); $$ = ast_new($1, 0); };
     | literal           { $$ = $1; };
-    | function_call     { $$ = NULL; };
+    | function_call     { $$ = $1; };
     ;
 
 literal: TK_LIT_INT {$$ = ast_new($1, 0);}
-    | TK_LIT_FLOAT {$$ = NULL;}
-    | TK_LIT_FALSE {$$ = NULL;}
-    | TK_LIT_TRUE {$$ = NULL;}
+    | TK_LIT_FLOAT {$$ = ast_new($1, 0);}
+    | TK_LIT_FALSE {$$ = ast_new($1, 0);}
+    | TK_LIT_TRUE {$$ = ast_new($1, 0);}
     ;
 
 %%

@@ -17,6 +17,10 @@
 #define OPERATOR 4 
 #define EXPRESSION  5 
 
+#define TOKEN_TYPE_INT 1
+#define TOKEN_TYPE_FLOAT 2
+#define TOKEN_TYPE_BOOL 3
+
 #define ARVORE_CALL 1
 
 typedef struct lexical_value
@@ -24,6 +28,7 @@ typedef struct lexical_value
 	int token_line;
 	char* token_value;
 	int token_type;
+  int token_nature;
 } lexical_value_t;
 
 typedef struct node_ast_tree {

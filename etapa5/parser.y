@@ -164,11 +164,17 @@ simple_command: local_declaration { $$ = $1; }
     | command_block { $$ = $1; }
     ;
 
-assignment: TK_IDENTIFICADOR '=' expression
+assignment: TK_IDENTIFICADOR '=' expression 
 {
      $$ = ast_new($2, 0);
      ast_add_child($$, ast_new($1, 0));
      ast_add_child($$, $3);
+
+    //STORE
+    //cria_iloc()
+    //descobrir endereço do TK_IDENTIFICADOR (q é pra estar na tabela de símbolo), 
+    //calcular deslocamento e saber se é local ou global
+
 }
     ;
 
@@ -229,13 +235,13 @@ precedence_1: '(' expression ')' {$$=$2;}
     | '-' precedence_1  { $$ = ast_new($1, 0); ast_add_child($$, $2); };
     | TK_IDENTIFICADOR  { $$ = ast_new($1, 0); };
     | literal           { $$ = $1; };
-    | function_call     { $$ = $1; };
+    | function_call     { $$ = NULL; };
     ;
 
 literal: TK_LIT_INT {$$ = ast_new($1, 0);}
-    | TK_LIT_FLOAT {$$ = ast_new($1, 0);}
-    | TK_LIT_FALSE {$$ = ast_new($1, 0);}
-    | TK_LIT_TRUE {$$ = ast_new($1, 0);}
+    | TK_LIT_FLOAT {$$ = NULL;}
+    | TK_LIT_FALSE {$$ = NULL;}
+    | TK_LIT_TRUE {$$ = NULL;}
     ;
 
 %%

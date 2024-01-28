@@ -5,36 +5,49 @@
 #include "iloc.h"
 
 // Função para criar uma nova operação ILOC
-OperacaoILOC* novaOperacaoILOC(char* operacao, char** argumentos, int num_argumentos) {
-    OperacaoILOC* o = (OperacaoILOC*) malloc(sizeof(OperacaoILOC));
-    o->operacao = strdup(operacao);
-    o->argumentos = (char**) malloc(num_argumentos * sizeof(char*));
-    for (int i = 0; i < num_argumentos; i++) {
-        o->argumentos[i] = strdup(argumentos[i]);
-    }
-    o->num_argumentos = num_argumentos;
-    return o;
+ILOCOperation* newILOCOperation(char* operation, char* campo_1, char* campo_2, char* campo_3) {
+
+    ILOCOperation* op = (ILOCOperation*)malloc(sizeof(ILOCOperation));
+
+    op->mnemonico = strdup(operation);
+    
+    op->campo_1 = strdup(campo_1);
+
+    if(campo_2 != NULL){ op->campo_2 = strdup(campo_2);} else { op->campo_2 = NULL; }
+
+    if(campo_3 != NULL){ op->campo_3 = strdup(campo_3);} else { op->campo_3 = NULL; }
+    
+    return op;
 }
 
-// Função para adicionar uma operação à lista de operações ILOC
-void adicionarOperacao(ListaOperacoesILOC* lista, OperacaoILOC* operacao) {
-    lista->operacoes = (OperacaoILOC*) realloc(lista->operacoes, (lista->num_operacoes + 1) * sizeof(OperacaoILOC));
-    lista->operacoes[lista->num_operacoes] = *operacao;
-    lista->num_operacoes++;
-}
 
 // Função para imprimir uma operação ILOC
-void imprimirOperacaoILOC(OperacaoILOC* operacao) {
-    printf("%s ", operacao->operacao);
-    for (int i = 0; i < operacao->num_argumentos; i++) {
-        printf("%s ", operacao->argumentos[i]);
-    }
+void printILOCOperation(ILOCOperation* operation) {
+    
+    printf("%s ", operation->mnemonico);
+
+    printf("%s ", operation->campo_1);
+
+    if(operation->campo_2 != NULL) {printf("%s ", operation->campo_2);}
+
+    if(operation->campo_3 != NULL) {printf("%s ", operation->campo_3);}
+
     printf("\n");
 }
 
+
+// Função para adicionar uma operação à lista de operações ILOC
+void addILOCOperation(ILOCOperationList* list, ILOCOperation* operation) {
+    list->operations = (ILOCOperation*)realloc(list->operations, (list->num_operations + 1) * sizeof(ILOCOperation));
+    list->operations[list->num_operations] = *operation;
+    list->num_operations++;
+}
+
+
 // Função para imprimir a lista de operações ILOC
-void imprimirListaOperacoesILOC(ListaOperacoesILOC* lista) {
-    for (int i = 0; i < lista->num_operacoes; i++) {
-        imprimirOperacaoILOC(&lista->operacoes[i]);
+void printILOCOperationList(ILOCOperationList* list) {
+    for (int i = 0; i < list->num_operations; i++) {
+        printILOCOperation(&list->operations[i]);
     }
 }
+

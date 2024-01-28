@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include "asd.h"
+#include "table.h"
 #include "parser.tab.h"
 %}
 

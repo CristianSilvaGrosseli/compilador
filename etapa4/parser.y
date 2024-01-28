@@ -13,7 +13,6 @@ int yyerror (char const *mensagem);
 extern void* arvore;
 TableList* global_table_list = NULL;
 Table* global_table = NULL;
-TableList* table_list;
 int get_line_number();
 int counter=0;
 int current_type = -1;
@@ -64,9 +63,9 @@ int current_type = -1;
 %type<nodo> global_declaration
 %type<nodo> parameter_list
 %type<nodo> parameter_tuple
-%type<nodo> variable_declaration
 %type<nodo> local_declaration
-%type<nodo> identifier_list
+%type<nodo> local_identifier_list
+%type<nodo> global_identifier_list
 %type<nodo> command_list
 %type<nodo> simple_command
 %type<nodo> command_block
@@ -92,13 +91,10 @@ int current_type = -1;
 
 %%
 
-push_table_scope: %empty { push_table(&global_table_list, global_table); }
+program_begin: program
 
-
-program_begin: push_table_scope program
-
-program: %empty { $$ = NULL; arvore = NULL; }
-    | list  {  $$ = $1; arvore = $$; pop_table(&global_table_list); }
+program: %empty { printf("program block"); $$ = NULL; arvore = NULL; }
+    | list  { $$ = $1; arvore = $$; /*pop_scope(&global_table_list);*/ }
     ;
 
 
@@ -119,39 +115,33 @@ element: function_definition { $$ = $1; }
     | global_declaration { $$ = $1; }
     ;
 
-function_definition: '(' push_table_scope parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block
+function_definition: '(' parameter_list ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block
 {
-    $8->token_nature = TOKEN_NATURE_FUNCTION;
-    insert_entry_to_table(global_table_list, $8);
-    $$ = asd_new($8, 0); asd_add_child($$,$9);
-}
-    ;
-
-function_definition: '(' push_table_scope ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block
-{
-    $7->token_type = current_type;
     $7->token_nature = TOKEN_NATURE_FUNCTION;
-    insert_entry_to_table(global_table_list, $7);
+    insert_symbol_to_global_scope(&global_table_list, $7);
     $$ = asd_new($7, 0); asd_add_child($$,$8);
 }
     ;
 
-parameter_tuple: type TK_IDENTIFICADOR { $$ = asd_new($2, 0); };
+function_definition: '(' ')' TK_OC_GE type '!' TK_IDENTIFICADOR command_block
+{
+    $6->token_type = current_type;
+    $6->token_nature = TOKEN_NATURE_FUNCTION;
+    insert_symbol_to_global_scope(&global_table_list, $6);
+    $$ = asd_new($6, 0); asd_add_child($$,$7);
+}
+    ;
+
+parameter_tuple: type TK_IDENTIFICADOR { $$ = asd_new($2, 0); insert_symbol_to_current_scope(&global_table_list, $2); };
 
 parameter_list: parameter_tuple { $$=$1; }
     | parameter_list ',' parameter_tuple { $$ = $1; asd_add_child($$, $3); };
 
 
-global_declaration: variable_declaration ';' { $$ = NULL; }
+global_declaration: type global_identifier_list ';' { printf("global declaration"); $$ = NULL; }
     ;
 
-local_declaration: variable_declaration { $$ = NULL; }
-    ;
-
-variable_declaration: type identifier_list
-{
-    $$ = NULL;
-}
+local_declaration: type local_identifier_list { printf("local declaration"); $$ = NULL; }
     ;
 
 type: TK_PR_INT { current_type = TOKEN_TYPE_INT; $$ = $1; }
@@ -159,43 +149,69 @@ type: TK_PR_INT { current_type = TOKEN_TYPE_INT; $$ = $1; }
     | TK_PR_BOOL { current_type = TOKEN_TYPE_BOOL;  $$ = $1; }
     ;
 
-identifier_list: TK_IDENTIFICADOR
+global_identifier_list: TK_IDENTIFICADOR
 {
+    printf("identifier list 1");
     if ($1 != NULL)
     {
         $1->token_type = current_type;
-        $1->token_nature = TOKEN_NATURE_IDENTIFIER;
-        insert_entry_to_table(global_table_list, $1);
+        $1->token_nature = TOKEN_NATURE_VARIABLE;
+        insert_symbol_to_global_scope(&global_table_list, $1);
     }
     $$ = NULL;
 }
-    | identifier_list ',' TK_IDENTIFICADOR
+    | global_identifier_list ',' TK_IDENTIFICADOR
 {
     if ($3 != NULL)
     {
+        printf("identifier list 2");
         $3->token_type = current_type;
-        $3->token_nature = TOKEN_NATURE_IDENTIFIER;
-        insert_entry_to_table(global_table_list, $3);
+        $3->token_nature = TOKEN_NATURE_VARIABLE;
+        insert_symbol_to_global_scope(&global_table_list, $3);
     }
     $$ = NULL;
 }
     ;
 
-command_block: '{' '}' { pop_table(&global_table_list); $$ = NULL; }
-    | '{' command_list '}' { pop_table(&global_table_list); $$ = $2; }
+local_identifier_list: TK_IDENTIFICADOR
+{
+    printf("identifier list 1");
+    if ($1 != NULL)
+    {
+        $1->token_type = current_type;
+        $1->token_nature = TOKEN_NATURE_VARIABLE;
+        insert_symbol_to_current_scope(&global_table_list, $1);
+    }
+    $$ = NULL;
+}
+    | local_identifier_list ',' TK_IDENTIFICADOR
+{
+    if ($3 != NULL)
+    {
+        printf("identifier list 2");
+        $3->token_type = current_type;
+        $3->token_nature = TOKEN_NATURE_VARIABLE;
+        insert_symbol_to_current_scope(&global_table_list, $3);
+    }
+    $$ = NULL;
+}
     ;
 
-command_list: push_table_scope simple_command ';' command_list {
-        if($2 == NULL) {
-            $$ = $4;
+command_block: '{' '}' { /*pop_scope(&global_table_list);*/ $$ = NULL; }
+    | '{' command_list '}' { /*pop_scope(&global_table_list);*/ $$ = $2; }
+    ;
+
+command_list: simple_command ';' command_list {
+        if($1 == NULL) {
+            $$ = $3;
         }
         else
         {
-            $$ = $2;
-            asd_add_child($$, $4);
+            $$ = $1;
+            asd_add_child($$, $3);
         }
     }
-    | push_table_scope simple_command ';' {$$ = $2;}
+    | simple_command ';' {$$ = $1;}
     ;
 
 simple_command: local_declaration { $$ = $1; }
@@ -213,21 +229,21 @@ assignment: TK_IDENTIFICADOR '=' expression
     asd_add_child($$, asd_new($1, 0));
     asd_add_child($$, $3);
     $1->token_type = infer_type($$);
-    check_err_undeclared(global_table_list, $1);
-    check_err_function(global_table_list, $1);
+    check_err_undeclared(&global_table_list, $1);
+    check_err_function(&global_table_list, $1);
 }
     ;
 
 function_call: TK_IDENTIFICADOR '(' expression_list ')'
 {
-    check_err_undeclared(global_table_list, $1);
-    check_err_variable(global_table_list, $1);
+    check_err_undeclared(&global_table_list, $1);
+    check_err_variable(&global_table_list, $1);
     $$ = asd_new($1, ARVORE_CALL); asd_add_child($$, $3);
 }
     | TK_IDENTIFICADOR '(' ')'
 {
-    check_err_undeclared(global_table_list, $1);
-    check_err_variable(global_table_list, $1);
+    check_err_undeclared(&global_table_list, $1);
+    check_err_variable(&global_table_list, $1);
     $$ = asd_new($1, ARVORE_CALL);
 }
     ;
@@ -239,25 +255,25 @@ return_command: TK_PR_RETURN expression
 }
     ;
 
-conditional_if: TK_PR_IF '(' expression ')' push_table_scope command_block
+conditional_if: TK_PR_IF '(' expression ')' command_block
 {
     $1->token_type = infer_type($3);
-    $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$,$6);
+    $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$,$5);
 }
     ;
 
-conditional_else: TK_PR_ELSE push_table_scope command_block
+conditional_else: TK_PR_ELSE command_block
 {
-    $1->token_type = infer_type($3);
-    $$ =  $3;
+    $1->token_type = infer_type($2);
+    $$ = $2;
 }
     | %empty { $$ = NULL; }
     ;
 
-iteration: TK_PR_WHILE '(' expression ')' push_table_scope command_block
+iteration: TK_PR_WHILE '(' expression ')' command_block
 {
     $1->token_type = infer_type($3);
-    $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$, $6);
+    $$ = asd_new($1, 0); asd_add_child($$,$3); asd_add_child($$, $5);
 }
     ;
 
@@ -299,7 +315,7 @@ precedence_2: precedence_1 {$$=$1;}
 precedence_1: '(' expression ')' {$$=$2;}
     | '!' precedence_1  { $$ = asd_new($1, 0); asd_add_child($$, $2); };
     | '-' precedence_1  { $$ = asd_new($1, 0); asd_add_child($$, $2); };
-    | TK_IDENTIFICADOR  { check_err_undeclared(global_table_list, $1); check_err_function(global_table_list, $1); $$ = asd_new($1, 0); };
+    | TK_IDENTIFICADOR  { check_err_undeclared(&global_table_list, $1); check_err_function(&global_table_list, $1); $$ = asd_new($1, 0); };
     | literal           { $$ = $1; };
     | function_call     { $$ = $1; };
     ;

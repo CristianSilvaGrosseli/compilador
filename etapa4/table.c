@@ -4,66 +4,107 @@
 
 #include "table.h"
 
-void push_table(TableList** list, Table* new_table)
+void push_scope(TableList** list)
 {
     TableList* new_table_node = (TableList*)malloc(sizeof(TableList));
-    new_table_node->symbol_table = new_table;
-
-    new_table_node->next = (*list);
-    new_table_node->previous = NULL;
-
-    (*list) = new_table_node;
+    new_table_node->symbol_table = NULL;
+    new_table_node->next = *list;
+    *list = new_table_node;
 }
 
-void pop_table(TableList** list)
+void pop_scope(TableList** list)
 {
-
-    TableList* front_node = (*list);
-
+    TableList* front_node = *list;
     TableList* new_front_node = front_node->next;
-
-    if( new_front_node != NULL)
-        {new_front_node->previous = NULL;}
-
-    (*list) = new_front_node;
-
+    *list = new_front_node;
     free(front_node);
-
 }
 
-void insert_entry_to_table(TableList* list, lexical_value_t* lexical_value)
+TableList* get_global_scope(TableList** list)
 {
-    check_err_declared(list, lexical_value);
+    TableList* current_table = *list;
+    while (current_table->next != NULL)
+    {
+        current_table = current_table->next;
+    }
+    return current_table;
+}
 
+int has_local_scope(TableList** list)
+{
+    TableList* current_table = *list;
+    int scope_count = 0;
+    while (current_table != NULL)
+    {
+        scope_count++;
+        if (scope_count > 1)
+        {
+            return 1;
+        }
+        current_table = current_table->next;
+    }
+    return 0;
+}
+
+void insert_symbol_to_global_scope(TableList** list, lexical_value_t* lexical_value)
+{
+    if (lexical_value == NULL)
+    {
+        return;
+    }
+    printf("insert_symbol_to_global_scope: %s", lexical_value->token_value);
+    if (*list == NULL)
+    {
+        printf("is null");
+        push_scope(list); // adiciona o escopo global
+    }
+    check_err_declared(list, lexical_value);
+    TableList* global_scope = get_global_scope(list);
+    printf("global scope: %p", global_scope);
+    insert_entry_to_table(&(global_scope->symbol_table), lexical_value);
+}
+
+void insert_symbol_to_current_scope(TableList** list, lexical_value_t* lexical_value)
+{
+    if (lexical_value == NULL)
+    {
+        return;
+    }
+    if (*list == NULL)
+    {
+        push_scope(list); // adiciona o escopo global
+    }
+    if (!has_local_scope(list))
+    {
+        push_scope(list); // adiciona um escopo local
+    }
+    check_err_declared(list, lexical_value);
+    insert_entry_to_table(&((*list)->symbol_table), lexical_value);
+}
+
+void insert_entry_to_table(Table** table, lexical_value_t* lexical_value)
+{
     Table* new_table = (Table*)malloc(sizeof(Table));
+    if (new_table == NULL)
+    {
+        printf("Memory allocation failed");
+        return;
+    }
+
     new_table->info = (lexical_value_t*)malloc(sizeof(lexical_value_t));
 
     new_table->info->token_value = strdup(lexical_value->token_value);
     new_table->info->token_line = lexical_value->token_line;
     new_table->info->token_type = lexical_value->token_type;
     new_table->info->token_nature = lexical_value->token_nature;
-    new_table->next = NULL;
+    new_table->next = *table;
 
-    Table* table = list->symbol_table;
-
-    if (table == NULL)
-    {
-        table = new_table;
-    }
-    else
-    {
-        Table* current_table = table;
-        while (current_table->next != NULL)
-        {
-            current_table = current_table->next;
-        }
-        current_table->next = new_table;
-    }
+    *table = new_table;
 }
 
-void check_err_declared(TableList* list, lexical_value_t* lexical_value)
+void check_err_declared(TableList** list, lexical_value_t* lexical_value)
 {
-    lexical_value_t* symbol_found = find_table_symbol(list, lexical_value);
+    lexical_value_t* symbol_found = find_value_through_scopes(list, lexical_value);
     if (symbol_found != NULL)
     {
         printf("ERRO DE SEMANTICA - LINHA %d - REDECLARACAO DO IDENTIFICADOR '%s'\n", lexical_value->token_line, lexical_value->token_value);
@@ -71,9 +112,9 @@ void check_err_declared(TableList* list, lexical_value_t* lexical_value)
     }
 }
 
-void check_err_undeclared(TableList* list, lexical_value_t* lexical_value)
+void check_err_undeclared(TableList** list, lexical_value_t* lexical_value)
 {
-    lexical_value_t* symbol_found = find_table_symbol(list, lexical_value);
+    lexical_value_t* symbol_found = find_value_through_scopes(list, lexical_value);
     if (symbol_found == NULL)
     {
         printf("ERRO DE SEMANTICA - LINHA %d - IDENTIFICADOR '%s' NAO DECLARADO\n", lexical_value->token_line, lexical_value->token_value);
@@ -81,9 +122,9 @@ void check_err_undeclared(TableList* list, lexical_value_t* lexical_value)
     }
 }
 
-void check_err_variable(TableList* list, lexical_value_t* lexical_value)
+void check_err_variable(TableList** list, lexical_value_t* lexical_value)
 {
-    lexical_value_t* symbol_found = find_table_symbol(list, lexical_value);
+    lexical_value_t* symbol_found = find_value_through_scopes(list, lexical_value);
     if (symbol_found != NULL)
     {
         if (symbol_found->token_nature != TOKEN_NATURE_FUNCTION)
@@ -94,9 +135,9 @@ void check_err_variable(TableList* list, lexical_value_t* lexical_value)
     }
 }
 
-void check_err_function(TableList* list, lexical_value_t* lexical_value)
+void check_err_function(TableList** list, lexical_value_t* lexical_value)
 {
-    lexical_value_t* symbol_found = find_table_symbol(list, lexical_value);
+    lexical_value_t* symbol_found = find_value_through_scopes(list, lexical_value);
     if (symbol_found != NULL)
     {
         if (symbol_found->token_nature != TOKEN_NATURE_VARIABLE)
@@ -107,31 +148,32 @@ void check_err_function(TableList* list, lexical_value_t* lexical_value)
     }
 }
 
-lexical_value_t* find_table_symbol(TableList* list, lexical_value_t* lexical_value)
+lexical_value_t* find_value_through_scopes(TableList** list, lexical_value_t* lexical_value)
 {
- 
-    TableList* current_list = list;
-  
-    if(current_list == NULL) { return NULL; }
-    
-    while(current_list->next != NULL)
+    TableList* current_table = *list;
+    while (current_table != NULL)
     {
-        if(current_list->symbol_table == NULL){ current_list = current_list->next; continue; }
-
-        Table* current_table = current_list->symbol_table;
-        
-        while (current_table->next != NULL)
+        lexical_value_t* value = find_table_symbol(current_table->symbol_table, lexical_value);
+        if (value != NULL)
         {
-            if (strcmp(lexical_value->token_value, current_table->info->token_value) == 0)
-            {
-                return current_table->info;
-            }
-            current_table = current_table->next;
+            return value;
         }
-        
-        current_list = current_list->next;
+        current_table = current_table->next;
     }
+    return NULL;
+}
 
+lexical_value_t* find_table_symbol(Table* table, lexical_value_t* lexical_value)
+{
+    Table* current_table = table;
+    while (current_table != NULL)
+    {
+        if (strcmp(lexical_value->token_value, current_table->info->token_value) == 0)
+        {
+            return current_table->info;
+        }
+        current_table = current_table->next;
+    }
     return NULL;
 }
 

@@ -15,30 +15,36 @@ tantes, ou nomes de rótulos */ //---------->>>> FAZER O RELEASE QND LIBERAR AS 
 // Uma instrução ILOC possui um mnemônico e até 3 argumentos
 // mnemonico e campo_1 é obrigatório
 // os campos(2,3) são opcionais
-typedef struct {
+typedef struct IlocOperation{
     
     char* mnemonico;
     char* campo_1;
     char* campo_2;
     char* campo_3;
 
-} ILOCOperation;
+} IlocOperation;
 
 // Estrutura para manter uma lista de operações ILOC
-typedef struct {
-    ILOCOperation* operations;
-    int num_operations;
-} ILOCOperationList;
+typedef struct IlocOperationList{
+    IlocOperation* operation;
+    struct IlocOperationList* next_operation;
+} IlocOperationList;
 
 
 // Função para criar uma nova operação ILOC
-ILOCOperation* newILOCOperation(char* operation, char* campo_1, char* campo_2, char* campo_3);
+IlocOperation* newIlocOperation(char* operation, char* campo_1, char* campo_2, char* campo_3);
+
 // Função para adicionar uma operação à lista de operações ILOC
-void addILOCOperation(ILOCOperationList* list, ILOCOperation* operation);
+IlocOperationList* addIlocOperation(IlocOperation* newIlocOperation);
 
 // Função para imprimir uma operação ILOC
-void printILOCOperation(ILOCOperation* operation);
+void printIlocOperation(IlocOperation* operation);
 
 // Função para imprimir a lista de operações ILOC
-void printILOCOperationList(ILOCOperationList* list);
+void printIlocOperationList(IlocOperationList* list);
+
+//store r1 => r2 // Memória(r2) = r1
+IlocOperation* store_operation(char* parameter_1, int parameter_2);
+
+void printIlocOperations();
 

@@ -4,10 +4,12 @@
 
 #include "iloc.h"
 
-// Função para criar uma nova operação ILOC
-ILOCOperation* newILOCOperation(char* operation, char* campo_1, char* campo_2, char* campo_3) {
+extern IlocOperationList* IlocOperations;
 
-    ILOCOperation* op = (ILOCOperation*)malloc(sizeof(ILOCOperation));
+// Função para criar uma nova operação ILOC
+IlocOperation* newIlocOperation(char* operation, char* campo_1, char* campo_2, char* campo_3) {
+
+    IlocOperation* op = (IlocOperation*)malloc(sizeof(IlocOperation));
 
     op->mnemonico = strdup(operation);
     
@@ -22,7 +24,7 @@ ILOCOperation* newILOCOperation(char* operation, char* campo_1, char* campo_2, c
 
 
 // Função para imprimir uma operação ILOC
-void printILOCOperation(ILOCOperation* operation) {
+void printIlocOperation(IlocOperation* operation) {
     
     printf("%s ", operation->mnemonico);
 
@@ -35,19 +37,62 @@ void printILOCOperation(ILOCOperation* operation) {
     printf("\n");
 }
 
+IlocOperationList* addIlocOperation(IlocOperation* newIlocOperation){
 
-// Função para adicionar uma operação à lista de operações ILOC
-void addILOCOperation(ILOCOperationList* list, ILOCOperation* operation) {
-    list->operations = (ILOCOperation*)realloc(list->operations, (list->num_operations + 1) * sizeof(ILOCOperation));
-    list->operations[list->num_operations] = *operation;
-    list->num_operations++;
+    IlocOperationList *newIlocNode = (IlocOperationList *)malloc(sizeof(IlocOperationList));
+
+    if(newIlocNode == NULL){
+        fprintf(stderr, "Erro na funcao addIlocOperation() \n");
+        fprintf(stderr, "Alocacao de memória falhou. \n");
+        exit(EXIT_FAILURE);
+    }
+
+    newIlocNode->operation = newIlocOperation;
+    newIlocNode->next_operation = NULL;
+
+    //se a lista de operações iloc não existir, adiciona uma primeria na lista de operações iloc
+    if(IlocOperations == NULL){ IlocOperations = newIlocNode; }
+
+    //se já existir uma lista de operações iloc, adiciona a nova oepração no final da lista de operações iloc
+    else{
+        IlocOperationList* current = IlocOperations;
+
+        while(current->next_operation != NULL){
+            current = current->next_operation;
+        }
+        current->next_operation = newIlocNode;
+    }
+
+    return newIlocNode;
 }
 
+//store r1 => r2 // Memória(r2) = r1
+IlocOperation* store_operation(char* parameter_1, int parameter_2){
 
-// Função para imprimir a lista de operações ILOC
-void printILOCOperationList(ILOCOperationList* list) {
-    for (int i = 0; i < list->num_operations; i++) {
-        printILOCOperation(&list->operations[i]);
+    IlocOperation* operation = (IlocOperation*)malloc(sizeof(IlocOperation));
+
+    snprintf(operation->campo_1, sizeof(operation->campo_1), "%s", parameter_1);
+    snprintf(operation->campo_2, sizeof(operation->campo_2), "r%d", parameter_2);
+    strcpy(operation->campo_3, "");
+    snprintf(operation->mnemonico, sizeof(operation->mnemonico), "store");
+
+}
+
+void printIlocOperations(){
+
+    IlocOperationList* current =  IlocOperations;
+
+    while(current != NULL){
+        char* mnemonico = current->operation->mnemonico;
+
+        if(strcmp(mnemonico, "store")){
+
+                //store r1 => r2 // Memória(r2) = r1
+            printf("%s %s => %s\n", current->operation->mnemonico, current->operation->campo_1, current->operation->campo_2);
+        }
+
+     current = current->next_operation;   
     }
+
 }
 

@@ -25,10 +25,15 @@
 #define TOKEN_NATURE_OPERATOR 7
 #define TOKEN_NATURE_EXPRESSION 8
 
+#define GLOBAL_SYMBOL_SCOPE 1
+#define LOCAL_SYMBOL_SCOPE 2
+
 /* Estrutura representando cada entrada de uma tabela, implementada como uma lista simplesmente encadeada. */
 typedef struct table
 {
     lexical_value_t* info;
+    char* base;
+    int displacement;
     struct table *next;
 
 } Table;
@@ -46,7 +51,7 @@ void pop_scope(TableList** list);
 TableList* get_global_scope(TableList** list);
 void insert_symbol_to_global_scope(TableList** list, lexical_value_t* lexical_value);
 void insert_symbol_to_current_scope(TableList** list, lexical_value_t* lexical_value);
-void insert_entry_to_table(Table** table, lexical_value_t* lexical_value);
+void insert_entry_to_table(Table** table, lexical_value_t* lexical_value, int symbol_scope);
 void check_err_declared(TableList** list, lexical_value_t* lexical_value);
 void check_err_undeclared(TableList** list, lexical_value_t* lexical_value);
 void check_err_variable(TableList** list, lexical_value_t* lexical_value);

@@ -4,6 +4,9 @@
 
 #include "table.h"
 
+int g_rbss_displacement = 0;
+int g_rfp_displacement = 0;
+
 void push_scope(TableList** list)
 {
     TableList* new_table_node = (TableList*)malloc(sizeof(TableList));
@@ -61,7 +64,7 @@ void insert_symbol_to_global_scope(TableList** list, lexical_value_t* lexical_va
     check_err_declared(list, lexical_value);
     TableList* global_scope = get_global_scope(list);
     printf("global scope: %p", global_scope);
-    insert_entry_to_table(&(global_scope->symbol_table), lexical_value);
+    insert_entry_to_table(&(global_scope->symbol_table), lexical_value, GLOBAL_SYMBOL_SCOPE);
 }
 
 void insert_symbol_to_current_scope(TableList** list, lexical_value_t* lexical_value)
@@ -79,10 +82,10 @@ void insert_symbol_to_current_scope(TableList** list, lexical_value_t* lexical_v
         push_scope(list); // adiciona um escopo local
     }
     check_err_declared(list, lexical_value);
-    insert_entry_to_table(&((*list)->symbol_table), lexical_value);
+    insert_entry_to_table(&((*list)->symbol_table), lexical_value, LOCAL_SYMBOL_SCOPE);
 }
 
-void insert_entry_to_table(Table** table, lexical_value_t* lexical_value)
+void insert_entry_to_table(Table** table, lexical_value_t* lexical_value, int symbol_scope)
 {
     Table* new_table = (Table*)malloc(sizeof(Table));
     if (new_table == NULL)
@@ -92,6 +95,18 @@ void insert_entry_to_table(Table** table, lexical_value_t* lexical_value)
     }
 
     new_table->info = (lexical_value_t*)malloc(sizeof(lexical_value_t));
+    if (symbol_scope == GLOBAL_SYMBOL_SCOPE)
+    {
+        new_table->base = "rbss";
+        new_table->displacement = g_rbss_displacement;
+        g_rbss_displacement += 4;
+    }
+    else
+    {
+        new_table->base = "rfp";
+        new_table->displacement = g_rfp_displacement;
+        g_rfp_displacement += 4;
+    }
 
     new_table->info->token_value = strdup(lexical_value->token_value);
     new_table->info->token_line = lexical_value->token_line;

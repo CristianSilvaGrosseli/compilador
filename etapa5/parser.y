@@ -16,6 +16,7 @@ Table* global_table = NULL;
 int get_line_number();
 int counter=0;
 int current_type = -1;
+int current_r = 0;
 %}
 
 %union
@@ -320,7 +321,12 @@ precedence_1: '(' expression ')' {$$=$2;}
     | function_call     { $$ = $1; };
     ;
 
-literal: TK_LIT_INT {$$ = ast_new($1, 0);}
+literal: TK_LIT_INT
+    {
+        $$ = ast_new($1, 0);
+        $$->label->register_number = current_r;
+        current_r++;
+    }
     | TK_LIT_FLOAT {$$ = ast_new($1, 0);}
     | TK_LIT_FALSE {$$ = ast_new($1, 0);}
     | TK_LIT_TRUE {$$ = ast_new($1, 0);}

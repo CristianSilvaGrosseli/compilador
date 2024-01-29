@@ -29,6 +29,7 @@ typedef struct lexical_value
 	char* token_value;
 	int token_type;
   int token_nature;
+  int register_number;
 } lexical_value_t;
 
 typedef struct node_ast_tree {

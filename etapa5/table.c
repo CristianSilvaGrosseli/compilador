@@ -1,4 +1,4 @@
-// Entrega 4
+// Entrega 5
 // Cristian Silva Grosseli - 00243693
 // Iuri Mendonça Tinti - 00278043
 
@@ -165,29 +165,29 @@ void check_err_function(TableList** list, lexical_value_t* lexical_value)
 
 lexical_value_t* find_value_through_scopes(TableList** list, lexical_value_t* lexical_value)
 {
-    TableList* current_table = *list;
-    while (current_table != NULL)
+    Table* table = find_table_node_by_value(list, lexical_value->token_value);
+    if (table != NULL && table->info != NULL)
     {
-        lexical_value_t* value = find_table_symbol(current_table->symbol_table, lexical_value);
-        if (value != NULL)
-        {
-            return value;
-        }
-        current_table = current_table->next;
+        return table->info;
     }
     return NULL;
 }
 
-lexical_value_t* find_table_symbol(Table* table, lexical_value_t* lexical_value)
+Table* find_table_node_by_value(TableList** list, char* value)
 {
-    Table* current_table = table;
-    while (current_table != NULL)
+    TableList* current_scope = *list;
+    while (current_scope != NULL)
     {
-        if (strcmp(lexical_value->token_value, current_table->info->token_value) == 0)
+        Table* current_table = current_scope->symbol_table;
+        while (current_table != NULL)
         {
-            return current_table->info;
+            if (strcmp(value, current_table->info->token_value) == 0)
+            {
+                return current_table;
+            }
+            current_table = current_table->next;
         }
-        current_table = current_table->next;
+        current_scope = current_scope->next;
     }
     return NULL;
 }

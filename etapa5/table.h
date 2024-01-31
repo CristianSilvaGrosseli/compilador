@@ -1,4 +1,4 @@
-// Entrega 4
+// Entrega 5
 // Cristian Silva Grosseli - 00243693
 // Iuri Mendonça Tinti - 00278043
 
@@ -59,7 +59,7 @@ void check_err_function(TableList** list, lexical_value_t* lexical_value);
 int infer_type(node_ast_tree_t* root_node);
 int aux_infer_type(int type1, int type2);
 lexical_value_t* find_value_through_scopes(TableList** list, lexical_value_t* lexical_value);
-lexical_value_t* find_table_symbol(Table* list, lexical_value_t* lexical_value);
+Table* find_table_node_by_value(TableList** list, char* value);
 void print_table_list(TableList** list);
 
 

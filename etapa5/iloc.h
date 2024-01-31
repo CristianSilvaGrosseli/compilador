@@ -15,8 +15,8 @@ tantes, ou nomes de rótulos */ //---------->>>> FAZER O RELEASE QND LIBERAR AS 
 // Uma instrução ILOC possui um mnemônico e até 3 argumentos
 // mnemonico e campo_1 é obrigatório
 // os campos(2,3) são opcionais
-typedef struct IlocOperation{
-    
+typedef struct IlocOperation
+{
     char* mnemonico;
     char* campo_1;
     char* campo_2;
@@ -25,7 +25,8 @@ typedef struct IlocOperation{
 } IlocOperation;
 
 // Estrutura para manter uma lista de operações ILOC
-typedef struct IlocOperationList{
+typedef struct IlocOperationList
+{
     IlocOperation* operation;
     struct IlocOperationList* next_operation;
 } IlocOperationList;

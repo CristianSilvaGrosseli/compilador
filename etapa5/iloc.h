@@ -2,6 +2,7 @@
 // Cristian Silva Grosseli - 00243693
 // Iuri Mendonça Tinti - 00278043
 
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

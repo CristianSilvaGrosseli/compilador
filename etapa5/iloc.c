@@ -4,7 +4,7 @@
 
 #include "iloc.h"
 
-extern IlocOperationList* IlocOperations;
+IlocOperationList* g_IlocOperations;
 
 // Função para criar uma nova operação ILOC
 IlocOperation* newIlocOperation(char* operation, char* campo_1, char* campo_2, char* campo_3) {
@@ -53,13 +53,13 @@ IlocOperationList* addIlocOperation(IlocOperation* newIlocOperation)
     newIlocNode->operation = newIlocOperation;
     newIlocNode->next_operation = NULL;
 
-    if (IlocOperations == NULL)
+    if (g_IlocOperations == NULL)
     {
-        IlocOperations = newIlocNode;
+        g_IlocOperations = newIlocNode;
     }
     else
     {
-        IlocOperationList* current = IlocOperations;
+        IlocOperationList* current = g_IlocOperations;
         while (current->next_operation != NULL)
         {
             current = current->next_operation;
@@ -73,9 +73,9 @@ IlocOperationList* addIlocOperation(IlocOperation* newIlocOperation)
 //store r1 => r2 // Memória(r2) = r1
 IlocOperation* store_operation(char* parameter_1, int parameter_2)
 {
-    char* field_2;
-    snprintf(field_2, 100, "r%d", parameter_2);
-    newIlocOperation("store", parameter_1, field_2, NULL);
+    char field_2[100];
+    snprintf(field_2, sizeof(field_2), "r%d", parameter_2);
+    return newIlocOperation("store", parameter_1, field_2, NULL);
 }
 
 // Função para imprimir uma operação ILOC
@@ -105,7 +105,7 @@ void printIlocOperation(IlocOperation* operation)
 
 void printIlocOperations()
 {
-    IlocOperationList* current =  IlocOperations;
+    IlocOperationList* current =  g_IlocOperations;
     while (current != NULL)
     {
         printIlocOperation(current->operation);

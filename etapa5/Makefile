@@ -1,7 +1,7 @@
 etapa5: lex.yy.o parser.tab.o main.o tad_ast.o table.o iloc.o
-	gcc -g -o etapa5 lex.yy.o parser.tab.o main.o tad_ast.o table.o
+	gcc -g -o etapa5 lex.yy.o parser.tab.o main.o tad_ast.o table.o iloc.o
 
-lex.yy.o parser.tab.o main.o tad_ast.o table.o iloc.o: lex.yy.c parser.tab.c tad_ast.c table.c iloc.c main.c 
+lex.yy.o parser.tab.o main.o tad_ast.o table.o iloc.o: lex.yy.c parser.tab.c tad_ast.c table.c iloc.c main.c
 	gcc -g -c lex.yy.c main.c tad_ast.c table.c iloc.c parser.tab.c
 
 lex.yy.c: scanner.l

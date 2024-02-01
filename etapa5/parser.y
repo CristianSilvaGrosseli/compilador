@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "tad_ast.h"
 #include "table.h"
+#include "iloc.h"
 
 int yylex(void);
 int yyerror (char const *mensagem);
@@ -232,6 +233,8 @@ assignment: TK_IDENTIFICADOR '=' expression
     $1->token_type = infer_type($$);
     check_err_undeclared(&global_table_list, $1);
     check_err_function(&global_table_list, $1);
+    Table* table_node = find_table_node_by_value(&global_table_list, $1->token_value);
+    addIlocOperation(store_operation(table_node->base, table_node->info->register_number));
 }
     ;
 

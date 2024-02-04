@@ -78,6 +78,25 @@ IlocOperation* store_operation(char* parameter_1, int parameter_2)
     return newIlocOperation("store", parameter_1, field_2, NULL);
 }
 
+IlocOperation* load_i_operation(char* parameter_1, int parameter_2)
+{
+    char field_2[100];
+    snprintf(field_2, sizeof(field_2), "r%d", parameter_2);
+    return newIlocOperation("loadi", parameter_1, field_2, NULL);
+}
+
+IlocOperation* custom_instruction_operation(char* instruction_name, int parameter_1, int parameter_2, int parameter_3)
+{
+    char field_1[100];
+    snprintf(field_1, sizeof(field_1), "r%d", parameter_1);
+    char field_2[100];
+    snprintf(field_2, sizeof(field_2), "r%d", parameter_2);
+    char field_3[100];
+    snprintf(field_3, sizeof(field_3), "r%d", parameter_3);
+    return newIlocOperation(instruction_name, field_1, field_2, field_3);
+}
+
+
 // Função para imprimir uma operação ILOC
 void printIlocOperation(IlocOperation* operation)
 {

@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "iloc.h"
 
 #define LITERAL 0
 #define IDENTIFIER 1
@@ -30,6 +31,7 @@ typedef struct lexical_value
 	int token_type;
   int token_nature;
   int register_number;
+  IlocOperationList* code;
 } lexical_value_t;
 
 typedef struct node_ast_tree {

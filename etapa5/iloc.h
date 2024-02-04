@@ -48,5 +48,9 @@ void printIlocOperationList(IlocOperationList* list);
 //store r1 => r2 // Memória(r2) = r1
 IlocOperation* store_operation(char* parameter_1, int parameter_2);
 
+IlocOperation* load_i_operation(char* parameter_1, int parameter_2);
+
+IlocOperation* custom_instruction_operation(char* instruction_name, int parameter_1, int parameter_2, int parameter_3);
+
 void printIlocOperations();
 

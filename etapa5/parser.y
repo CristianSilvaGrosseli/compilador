@@ -18,6 +18,8 @@ int get_line_number();
 int counter=0;
 int current_type = -1;
 int current_r = 0;
+int cbr_r = 0;
+int current_label = 0;
 %}
 
 %union
@@ -259,10 +261,10 @@ return_command: TK_PR_RETURN expression
 }
     ;
 
-conditional_if: TK_PR_IF '(' expression ')' command_block
+conditional_if: TK_PR_IF '(' expression ')' add_cbr command_block
 {
     $1->token_type = infer_type($3);
-    $$ = ast_new($1, 0); ast_add_child($$,$3); ast_add_child($$,$5);
+    $$ = ast_new($1, 0); ast_add_child($$,$3); ast_add_child($$,$6);
 }
     ;
 
@@ -281,6 +283,11 @@ iteration: TK_PR_WHILE '(' expression ')' command_block
 }
     ;
 
+add_cbr: %empty
+{
+    cbr_operation(cbr_r, current_label, current_label + 1);
+}
+
 expression_list: expression  ',' expression_list { if ($1 != NULL) { $$ = $1; ast_add_child($$, $3); } else { $$ = $3; } }
     | expression { $$ = $1 ; }
     ;
@@ -292,6 +299,7 @@ expression: precedence_6 {$$=$1;}
         ast_add_child($$, $1);
         ast_add_child($$, $3);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
         $$->label->code = addIlocOperation(custom_instruction_operation("or", $1->label->register_number, $3->label->register_number, $$->label->register_number));
     };
@@ -304,6 +312,7 @@ precedence_6: precedence_5                {$$=$1;}
         ast_add_child($$, $1);
         ast_add_child($$, $3);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
         $$->label->code = addIlocOperation(custom_instruction_operation("and", $1->label->register_number, $3->label->register_number, $$->label->register_number));
     };
@@ -316,6 +325,7 @@ precedence_5: precedence_4               {$$=$1;}
         ast_add_child($$, $1);
         ast_add_child($$, $3);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
         $$->label->code = addIlocOperation(custom_instruction_operation("cmp_EQ", $1->label->register_number, $3->label->register_number, $$->label->register_number));
     };
@@ -325,6 +335,7 @@ precedence_5: precedence_4               {$$=$1;}
         ast_add_child($$, $1);
         ast_add_child($$, $3);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
         $$->label->code = addIlocOperation(custom_instruction_operation("cmp_NE", $1->label->register_number, $3->label->register_number, $$->label->register_number));
     };
@@ -337,6 +348,7 @@ precedence_4: precedence_3          {$$=$1;}
         ast_add_child($$, $1);
         ast_add_child($$, $3);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
         $$->label->code = addIlocOperation(custom_instruction_operation("cmp_LT", $1->label->register_number, $3->label->register_number, $$->label->register_number));
     };
@@ -346,6 +358,7 @@ precedence_4: precedence_3          {$$=$1;}
         ast_add_child($$, $1);
         ast_add_child($$, $3);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
         $$->label->code = addIlocOperation(custom_instruction_operation("cmp_GT", $1->label->register_number, $3->label->register_number, $$->label->register_number));
     };
@@ -355,6 +368,7 @@ precedence_4: precedence_3          {$$=$1;}
         ast_add_child($$, $1);
         ast_add_child($$, $3);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
         $$->label->code = addIlocOperation(custom_instruction_operation("cmp_LE", $1->label->register_number, $3->label->register_number, $$->label->register_number));
     };
@@ -364,6 +378,7 @@ precedence_4: precedence_3          {$$=$1;}
         ast_add_child($$, $1);
         ast_add_child($$, $3);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
         $$->label->code = addIlocOperation(custom_instruction_operation("cmp_GE", $1->label->register_number, $3->label->register_number, $$->label->register_number));
     };
@@ -376,6 +391,7 @@ precedence_3: precedence_2          {$$=$1;}
         ast_add_child($$, $1);
         ast_add_child($$, $3);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
         $$->label->code = addIlocOperation(custom_instruction_operation("add", $1->label->register_number, $3->label->register_number, $$->label->register_number));
     };
@@ -385,6 +401,7 @@ precedence_3: precedence_2          {$$=$1;}
         ast_add_child($$, $1);
         ast_add_child($$, $3);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
         $$->label->code = addIlocOperation(custom_instruction_operation("sub", $1->label->register_number, $3->label->register_number, $$->label->register_number));
     };
@@ -397,6 +414,7 @@ precedence_2: precedence_1 {$$=$1;}
         ast_add_child($$, $1);
         ast_add_child($$, $3);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
         $$->label->code = addIlocOperation(custom_instruction_operation("mult", $1->label->register_number, $3->label->register_number, $$->label->register_number));
     };
@@ -406,6 +424,7 @@ precedence_2: precedence_1 {$$=$1;}
         ast_add_child($$, $1);
         ast_add_child($$, $3);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
         $$->label->code = addIlocOperation(custom_instruction_operation("div", $1->label->register_number, $3->label->register_number, $$->label->register_number));
     };
@@ -424,6 +443,7 @@ literal: TK_LIT_INT
     {
         $$ = ast_new($1, 0);
         $$->label->register_number = current_r;
+        cbr_r = current_r;
         current_r++;
     }
     | TK_LIT_FLOAT {$$ = ast_new($1, 0);}

@@ -52,5 +52,7 @@ IlocOperation* load_i_operation(char* parameter_1, int parameter_2);
 
 IlocOperation* custom_instruction_operation(char* instruction_name, int parameter_1, int parameter_2, int parameter_3);
 
+void cbr_operation(int register_number, int label_1, int label_2);
+
 void printIlocOperations();
 

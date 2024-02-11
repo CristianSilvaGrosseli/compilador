@@ -76,8 +76,7 @@ int current_label = 0;
 %type<nodo> assignment
 %type<nodo> function_call
 %type<nodo> return_command
-%type<nodo> conditional_if
-%type<nodo> conditional_else
+%type<nodo> conditional
 %type<nodo> iteration
 %type<nodo> expression_list
 %type<nodo> expression
@@ -142,10 +141,10 @@ parameter_list: parameter_tuple { $$=$1; }
     | parameter_list ',' parameter_tuple { $$ = $1; ast_add_child($$, $3); };
 
 
-global_declaration: type global_identifier_list ';' { printf("global declaration"); $$ = NULL; }
+global_declaration: type global_identifier_list ';' { $$ = NULL; }
     ;
 
-local_declaration: type local_identifier_list { printf("local declaration"); $$ = NULL; }
+local_declaration: type local_identifier_list { $$ = NULL; }
     ;
 
 type: TK_PR_INT { current_type = TOKEN_TYPE_INT; $$ = $1; }
@@ -155,7 +154,6 @@ type: TK_PR_INT { current_type = TOKEN_TYPE_INT; $$ = $1; }
 
 global_identifier_list: TK_IDENTIFICADOR
 {
-    printf("identifier list 1");
     if ($1 != NULL)
     {
         $1->token_type = current_type;
@@ -168,7 +166,6 @@ global_identifier_list: TK_IDENTIFICADOR
 {
     if ($3 != NULL)
     {
-        printf("identifier list 2");
         $3->token_type = current_type;
         $3->token_nature = TOKEN_NATURE_VARIABLE;
         insert_symbol_to_global_scope(&global_table_list, $3);
@@ -179,7 +176,6 @@ global_identifier_list: TK_IDENTIFICADOR
 
 local_identifier_list: TK_IDENTIFICADOR
 {
-    printf("identifier list 1");
     if ($1 != NULL)
     {
         $1->token_type = current_type;
@@ -192,7 +188,6 @@ local_identifier_list: TK_IDENTIFICADOR
 {
     if ($3 != NULL)
     {
-        printf("identifier list 2");
         $3->token_type = current_type;
         $3->token_nature = TOKEN_NATURE_VARIABLE;
         insert_symbol_to_current_scope(&global_table_list, $3);
@@ -222,7 +217,7 @@ simple_command: local_declaration { $$ = $1; }
     | assignment { $$ = $1; }
     | function_call { $$ = $1; }
     | return_command { $$ = $1; }
-    | conditional_if conditional_else { $$ = $1; ast_add_child($$, $2); }
+    | conditional { $$ = $1; }
     | iteration { $$ = $1; }
     | command_block { $$ = $1; }
     ;
@@ -236,7 +231,7 @@ assignment: TK_IDENTIFICADOR '=' expression
     check_err_undeclared(&global_table_list, $1);
     check_err_function(&global_table_list, $1);
     Table* table_node = find_table_node_by_value(&global_table_list, $1->token_value);
-    $$->label->code = addIlocOperation(store_operation(table_node->base, table_node->info->register_number));
+    $$->label->code = store_AI_operation(table_node->info->register_number, table_node->base, table_node->displacement);
 }
     ;
 
@@ -261,25 +256,25 @@ return_command: TK_PR_RETURN expression
 }
     ;
 
-conditional_if: TK_PR_IF '(' expression ')' add_cbr command_block
-{
-    $1->token_type = infer_type($3);
-    $$ = ast_new($1, 0); ast_add_child($$,$3); ast_add_child($$,$6);
-}
+conditional: TK_PR_IF '(' expression ')' add_cbr add_label command_block add_jump_I_else TK_PR_ELSE add_label command_block add_label
+    {
+        $1->token_type = infer_type($3);
+        $$ = ast_new($1, 0); ast_add_child($$,$3); ast_add_child($$,$7);
+
+        $9->token_type = infer_type($11);
+        ast_add_child($$, $11);
+    }
+    | TK_PR_IF '(' expression ')' add_cbr add_label command_block add_label
+    {
+        $1->token_type = infer_type($3);
+        $$ = ast_new($1, 0); ast_add_child($$,$3); ast_add_child($$,$7);
+    }
     ;
 
-conditional_else: TK_PR_ELSE command_block
+iteration: TK_PR_WHILE add_label '(' expression ')' add_cbr_while add_label command_block add_jump_I_end_while add_label
 {
-    $1->token_type = infer_type($2);
-    $$ = $2;
-}
-    | %empty { $$ = NULL; }
-    ;
-
-iteration: TK_PR_WHILE '(' expression ')' command_block
-{
-    $1->token_type = infer_type($3);
-    $$ = ast_new($1, 0); ast_add_child($$,$3); ast_add_child($$, $5);
+    $1->token_type = infer_type($4);
+    $$ = ast_new($1, 0); ast_add_child($$,$4); ast_add_child($$, $8);
 }
     ;
 
@@ -287,6 +282,31 @@ add_cbr: %empty
 {
     cbr_operation(cbr_r, current_label, current_label + 1);
 }
+    ;
+
+add_cbr_while: %empty
+{
+    cbr_operation(cbr_r, current_label, current_label + 1);
+}
+    ;
+
+add_label: %empty
+{
+    add_label_operation(current_label++);
+}
+    ;
+
+add_jump_I_else: %empty
+{
+    add_jump_i_operation(current_label + 1);
+}
+    ;
+
+add_jump_I_end_while: %empty
+{
+    add_jump_i_operation(current_label-2);
+}
+    ;
 
 expression_list: expression  ',' expression_list { if ($1 != NULL) { $$ = $1; ast_add_child($$, $3); } else { $$ = $3; } }
     | expression { $$ = $1 ; }
@@ -301,7 +321,7 @@ expression: precedence_6 {$$=$1;}
         $$->label->register_number = current_r;
         cbr_r = current_r;
         current_r++;
-        $$->label->code = addIlocOperation(custom_instruction_operation("or", $1->label->register_number, $3->label->register_number, $$->label->register_number));
+        $$->label->code = custom_instruction_operation("or", $1->label->register_number, $3->label->register_number, $$->label->register_number);
     };
     ;
 
@@ -314,7 +334,7 @@ precedence_6: precedence_5                {$$=$1;}
         $$->label->register_number = current_r;
         cbr_r = current_r;
         current_r++;
-        $$->label->code = addIlocOperation(custom_instruction_operation("and", $1->label->register_number, $3->label->register_number, $$->label->register_number));
+        $$->label->code = custom_instruction_operation("and", $1->label->register_number, $3->label->register_number, $$->label->register_number);
     };
     ;
 
@@ -327,7 +347,7 @@ precedence_5: precedence_4               {$$=$1;}
         $$->label->register_number = current_r;
         cbr_r = current_r;
         current_r++;
-        $$->label->code = addIlocOperation(custom_instruction_operation("cmp_EQ", $1->label->register_number, $3->label->register_number, $$->label->register_number));
+        $$->label->code = custom_instruction_operation("cmp_EQ", $1->label->register_number, $3->label->register_number, $$->label->register_number);
     };
     | precedence_5 TK_OC_NE precedence_4
     {
@@ -337,7 +357,7 @@ precedence_5: precedence_4               {$$=$1;}
         $$->label->register_number = current_r;
         cbr_r = current_r;
         current_r++;
-        $$->label->code = addIlocOperation(custom_instruction_operation("cmp_NE", $1->label->register_number, $3->label->register_number, $$->label->register_number));
+        $$->label->code = custom_instruction_operation("cmp_NE", $1->label->register_number, $3->label->register_number, $$->label->register_number);
     };
     ;
 
@@ -350,7 +370,7 @@ precedence_4: precedence_3          {$$=$1;}
         $$->label->register_number = current_r;
         cbr_r = current_r;
         current_r++;
-        $$->label->code = addIlocOperation(custom_instruction_operation("cmp_LT", $1->label->register_number, $3->label->register_number, $$->label->register_number));
+        $$->label->code = custom_instruction_operation("cmp_LT", $1->label->register_number, $3->label->register_number, $$->label->register_number);
     };
     | precedence_4 '>' precedence_3
     {
@@ -360,7 +380,7 @@ precedence_4: precedence_3          {$$=$1;}
         $$->label->register_number = current_r;
         cbr_r = current_r;
         current_r++;
-        $$->label->code = addIlocOperation(custom_instruction_operation("cmp_GT", $1->label->register_number, $3->label->register_number, $$->label->register_number));
+        $$->label->code = custom_instruction_operation("cmp_GT", $1->label->register_number, $3->label->register_number, $$->label->register_number);
     };
     | precedence_4 TK_OC_LE precedence_3
     {
@@ -370,7 +390,7 @@ precedence_4: precedence_3          {$$=$1;}
         $$->label->register_number = current_r;
         cbr_r = current_r;
         current_r++;
-        $$->label->code = addIlocOperation(custom_instruction_operation("cmp_LE", $1->label->register_number, $3->label->register_number, $$->label->register_number));
+        $$->label->code = custom_instruction_operation("cmp_LE", $1->label->register_number, $3->label->register_number, $$->label->register_number);
     };
     | precedence_4 TK_OC_GE precedence_3
     {
@@ -380,7 +400,7 @@ precedence_4: precedence_3          {$$=$1;}
         $$->label->register_number = current_r;
         cbr_r = current_r;
         current_r++;
-        $$->label->code = addIlocOperation(custom_instruction_operation("cmp_GE", $1->label->register_number, $3->label->register_number, $$->label->register_number));
+        $$->label->code = custom_instruction_operation("cmp_GE", $1->label->register_number, $3->label->register_number, $$->label->register_number);
     };
     ;
 
@@ -393,7 +413,7 @@ precedence_3: precedence_2          {$$=$1;}
         $$->label->register_number = current_r;
         cbr_r = current_r;
         current_r++;
-        $$->label->code = addIlocOperation(custom_instruction_operation("add", $1->label->register_number, $3->label->register_number, $$->label->register_number));
+        $$->label->code = custom_instruction_operation("add", $1->label->register_number, $3->label->register_number, $$->label->register_number);
     };
     | precedence_3 '-' precedence_2
     {
@@ -403,7 +423,7 @@ precedence_3: precedence_2          {$$=$1;}
         $$->label->register_number = current_r;
         cbr_r = current_r;
         current_r++;
-        $$->label->code = addIlocOperation(custom_instruction_operation("sub", $1->label->register_number, $3->label->register_number, $$->label->register_number));
+        $$->label->code = custom_instruction_operation("sub", $1->label->register_number, $3->label->register_number, $$->label->register_number);
     };
     ;
 
@@ -416,7 +436,7 @@ precedence_2: precedence_1 {$$=$1;}
         $$->label->register_number = current_r;
         cbr_r = current_r;
         current_r++;
-        $$->label->code = addIlocOperation(custom_instruction_operation("mult", $1->label->register_number, $3->label->register_number, $$->label->register_number));
+        $$->label->code = custom_instruction_operation("mult", $1->label->register_number, $3->label->register_number, $$->label->register_number);
     };
     | precedence_2 '/' precedence_1
     {
@@ -426,7 +446,7 @@ precedence_2: precedence_1 {$$=$1;}
         $$->label->register_number = current_r;
         cbr_r = current_r;
         current_r++;
-        $$->label->code = addIlocOperation(custom_instruction_operation("div", $1->label->register_number, $3->label->register_number, $$->label->register_number));
+        $$->label->code = custom_instruction_operation("div", $1->label->register_number, $3->label->register_number, $$->label->register_number);
     };
     | precedence_2 '%' precedence_1 { $$ = ast_new($2, 0); ast_add_child($$, $1); ast_add_child($$, $3); };
     ;
@@ -434,8 +454,22 @@ precedence_2: precedence_1 {$$=$1;}
 precedence_1: '(' expression ')' {$$=$2;}
     | '!' precedence_1  { $$ = ast_new($1, 0); ast_add_child($$, $2); };
     | '-' precedence_1  { $$ = ast_new($1, 0); ast_add_child($$, $2); };
-    | TK_IDENTIFICADOR  { check_err_undeclared(&global_table_list, $1); check_err_function(&global_table_list, $1); $$ = ast_new($1, 0); };
-    | literal           { $$ = $1; };
+    | TK_IDENTIFICADOR
+    {
+        check_err_undeclared(&global_table_list, $1);
+        check_err_function(&global_table_list, $1);
+        $$ = ast_new($1, 0);
+        $$->label->register_number = current_r;
+        cbr_r = current_r;
+        current_r++;
+        Table* table_node = find_table_node_by_value(&global_table_list, $1->token_value);
+        $$->label->code = load_AI_operation(table_node->info->register_number, table_node->base, table_node->displacement);
+    };
+    | literal
+    {
+        $$ = $1;
+        $$->label->code = load_i_operation($1->label->token_value, $1->label->register_number);
+    };
     | function_call     { $$ = $1; };
     ;
 

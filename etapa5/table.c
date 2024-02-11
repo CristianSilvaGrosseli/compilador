@@ -55,15 +55,12 @@ void insert_symbol_to_global_scope(TableList** list, lexical_value_t* lexical_va
     {
         return;
     }
-    printf("insert_symbol_to_global_scope: %s", lexical_value->token_value);
     if (*list == NULL)
     {
-        printf("is null");
         push_scope(list); // adiciona o escopo global
     }
     check_err_declared(list, lexical_value);
     TableList* global_scope = get_global_scope(list);
-    printf("global scope: %p", global_scope);
     insert_entry_to_table(&(global_scope->symbol_table), lexical_value, GLOBAL_SYMBOL_SCOPE);
 }
 
@@ -227,7 +224,6 @@ int aux_infer_type(int type1, int type2)
 
 void print_table_list(TableList** list)
 {
-    printf("print_table()\n");
     TableList* current_list = *list;
     int list_number = 0;
     int table_number = 0;

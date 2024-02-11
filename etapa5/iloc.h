@@ -46,13 +46,19 @@ void printIlocOperation(IlocOperation* operation);
 void printIlocOperationList(IlocOperationList* list);
 
 //store r1 => r2 // Memória(r2) = r1
-IlocOperation* store_operation(char* parameter_1, int parameter_2);
+IlocOperationList* store_AI_operation(int parameter_1, char* parameter_2, int parameter_3);
 
-IlocOperation* load_i_operation(char* parameter_1, int parameter_2);
+IlocOperationList* load_i_operation(char* parameter_1, int parameter_2);
 
-IlocOperation* custom_instruction_operation(char* instruction_name, int parameter_1, int parameter_2, int parameter_3);
+IlocOperationList* load_AI_operation(int parameter_1, char* parameter_2, int parameter_3);
+
+IlocOperationList* custom_instruction_operation(char* instruction_name, int parameter_1, int parameter_2, int parameter_3);
 
 void cbr_operation(int register_number, int label_1, int label_2);
+
+void add_label_operation(int label);
+
+void add_jump_i_operation(int label);
 
 void printIlocOperations();
 

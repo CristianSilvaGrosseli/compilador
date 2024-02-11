@@ -52,7 +52,6 @@ void insert_symbol_to_global_scope(TableList** list, lexical_value_t* lexical_va
     {
         return;
     }
-    printf("insert_symbol_to_global_scope: %s", lexical_value->token_value);
     if (*list == NULL)
     {
         printf("is null");

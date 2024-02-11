@@ -67,6 +67,7 @@ static void _print_tree (FILE *foutput, node_ast_tree_t *node, int depth);
  * Função ast_print_graphviz, idem, em formato DOT
  */
 void ast_print_graphviz (node_ast_tree_t *tree);
+void exporta(void *arvore);
 
 lexical_value_t* lexical_value_create(int token_type, char* token_value);
 

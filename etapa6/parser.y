@@ -1,5 +1,5 @@
 %{
-// Entrega 5
+// Entrega 6
 // Cristian Silva Grosseli - 00243693
 // Iuri Mendonça Tinti - 00278043
 
@@ -12,8 +12,8 @@
 int yylex(void);
 int yyerror (char const *mensagem);
 extern void* arvore;
-TableList* global_table_list = NULL;
-Table* global_table = NULL;
+extern TableList* global_table_list;
+extern Table* global_table;
 int get_line_number();
 int counter=0;
 int current_type = -1;

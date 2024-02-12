@@ -1,4 +1,4 @@
-// Entrega 5
+// Entrega 6
 // Cristian Silva Grosseli - 00243693
 // Iuri Mendonça Tinti - 00278043
 
@@ -22,6 +22,10 @@ typedef struct IlocOperation
     char* campo_1;
     char* campo_2;
     char* campo_3;
+    int register_number;
+    char* base;
+    int register_number_2;
+    char* base_2;
 
 } IlocOperation;
 
@@ -62,3 +66,4 @@ void add_jump_i_operation(int label);
 
 void printIlocOperations();
 
+void printAssemblyInstructions();

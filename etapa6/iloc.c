@@ -1,9 +1,12 @@
-// Entrega 5
+// Entrega 6
 // Cristian Silva Grosseli - 00243693
 // Iuri Mendonça Tinti - 00278043
 
 #include "iloc.h"
+#include "table.h"
 
+extern TableList* global_table_list;
+extern Table* global_table;
 IlocOperationList* g_IlocOperations;
 
 // Função para criar uma nova operação ILOC
@@ -18,6 +21,8 @@ IlocOperation* newIlocOperation(char* operation, char* campo_1, char* campo_2, c
     }
 
     op->mnemonico = strdup(operation);
+    op->register_number = -1;
+    op->base = "";
     if (campo_1 != NULL)
     {
         op->campo_1 = strdup(campo_1);
@@ -80,7 +85,10 @@ IlocOperationList* store_AI_operation(int parameter_1, char* parameter_2, int pa
     snprintf(field_1, sizeof(field_1), "r%d", parameter_1);
     char field_3[100];
     snprintf(field_3, sizeof(field_3), "%d", parameter_3);
-    return addIlocOperation(newIlocOperation("storeAI", field_1, parameter_2, field_3));
+    IlocOperation* operation = newIlocOperation("storeAI", field_1, parameter_2, field_3);
+    operation->register_number = parameter_1;
+    operation->base = parameter_2;
+    return addIlocOperation(operation);
 }
 
 IlocOperationList* load_i_operation(char* parameter_1, int parameter_2)
@@ -196,6 +204,50 @@ void printIlocOperations()
     while (current != NULL)
     {
         printIlocOperation(current->operation);
+        current = current->next_operation;
+    }
+}
+
+void printAssemblyInstructions()
+{
+    IlocOperationList* current = g_IlocOperations;
+
+    while (current != NULL)
+    {
+        char *instruction_mnemonic = current->operation->mnemonico;
+        if (strcmp(instruction_mnemonic, "storeAI") == 0)
+        {
+            printf("movl\t%%eax, -%d(%%%s)\n", current->operation->register_number, current->operation->base);
+        }
+        else if (strcmp(instruction_mnemonic, "loadI") == 0)
+        {
+            printf("movl\t$%s, %%eax\n", current->operation->campo_1);
+        }
+        else if (
+            strcmp(instruction_mnemonic, "add") == 0 ||
+            strcmp(instruction_mnemonic, "sub") == 0 ||
+            strcmp(instruction_mnemonic, "mult") == 0 ||
+            strcmp(instruction_mnemonic, "div") == 0 ||
+            strcmp(instruction_mnemonic, "cmp_EQ") == 0 ||
+            strcmp(instruction_mnemonic, "cmp_NE") == 0 ||
+            strcmp(instruction_mnemonic, "cmp_GE") == 0 ||
+            strcmp(instruction_mnemonic, "cmp_LE") == 0 ||
+            strcmp(instruction_mnemonic, "cmp_GT") == 0 ||
+            strcmp(instruction_mnemonic, "cmp_LT") == 0 ||
+            strcmp(instruction_mnemonic, "and") == 0 ||
+            strcmp(instruction_mnemonic, "or") == 0
+        )
+        {
+            printf("movl\t-%d(%%%s), %%edx\n", current->operation->register_number, current->operation->base);
+            printf("movl\t-%d(%%%s), %%eax\n", current->operation->register_number_2, current->operation->base_2);
+            printf("%s\t%%eax, %%edx\n", instruction_mnemonic);
+            IlocOperationList* next = current->next_operation;
+            if (next != NULL)
+            {
+                printf("movl\t%%edx, -%s(%%%s)\n", next->operation->campo_3, next->operation->campo_2);
+            }
+            current = current->next_operation;
+        }
         current = current->next_operation;
     }
 }

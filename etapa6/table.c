@@ -1,4 +1,4 @@
-// Entrega 5
+// Entrega 6
 // Cristian Silva Grosseli - 00243693
 // Iuri Mendonça Tinti - 00278043
 
@@ -228,7 +228,7 @@ void print_table_list(TableList** list)
     int list_number = 0;
     int table_number = 0;
 
-    while(current_list->next != NULL)
+    while(current_list != NULL)
     {
         printf("list: %d\n", ++list_number);
         Table* current_table = current_list->symbol_table;

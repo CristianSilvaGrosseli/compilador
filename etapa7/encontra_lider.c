@@ -1,3 +1,7 @@
+// Entrega 7
+// Cristian Silva Grosseli - 00243693
+// Iuri Mendonça Tinti - 00278043
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

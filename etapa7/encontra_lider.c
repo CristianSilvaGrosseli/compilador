@@ -1,7 +1,3 @@
-// Entrega 7
-// Cristian Silva Grosseli - 00243693
-// Iuri Mendonça Tinti - 00278043
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,11 +43,9 @@ void appendLeaderToList(Leader** head, const char* value, int numero_linha) {
             printf("Leader already exists!\n");
             return;
         }
-
         currentLeader = currentLeader->next;
     }
-    free(currentLeader);
-
+    
 
     Leader* newLeader = createLeader(value, numero_linha);
     if (newLeader == NULL) {
@@ -104,6 +98,32 @@ void appendDesvioToList(Desvio** head, const char* value, int numero_linha, char
     }
 }
 
+char *strdup_without_newline(const char *str) {
+    // Encontra a posição do caractere de nova linha
+    const char *newline_pos = strchr(str, '\n');
+    
+    // Se não encontrar, copia toda a string
+    if (newline_pos == NULL) {
+        return strdup(str);
+    }
+
+    // Calcula o comprimento da substring até o caractere de nova linha
+    size_t length = newline_pos - str;
+
+    // Aloca memória para a nova string sem o caractere de nova linha
+    char *result = (char *)malloc(length + 1);
+    if (result == NULL) {
+        fprintf(stderr, "Erro ao alocar memória\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Copia os caracteres até o caractere de nova linha
+    strncpy(result, str, length);
+    result[length] = '\0';  // Adiciona o caractere nulo de término
+
+    return result;
+}
+
 char* extrair_destino(const char* instrucao) {
     // Encontra a posição do caractere ">"
     const char* posicao_marcador = strchr(instrucao, '>');
@@ -113,8 +133,10 @@ char* extrair_destino(const char* instrucao) {
         return NULL;
 
     // Retorna a string após o marcador ">"
-    return strdup(posicao_marcador + 2); // +2 para ignorar o ">" e o espaço seguinte
+    //return strdup(posicao_marcador + 2); // +2 para ignorar o ">" e o espaço seguinte
+    return strdup_without_newline(posicao_marcador+2);
 }
+
 
 // Função para extrair os valores após "=>"
 void extractValues(const char* input, char* value1, char* value2) {
@@ -130,11 +152,26 @@ void extractValues(const char* input, char* value1, char* value2) {
         sscanf(arrowPos, "%[^,],", value1);
         
         // Extrai o segundo valor (depois da vírgula)
-        sscanf(arrowPos, "%*[^,], %s", value2);
+        //sscanf(arrowPos, "%*[^,], %s", value2);
+        strcpy(value2, strdup_without_newline(arrowPos+4));
     } else {
         // Se não encontrar, retorna strings vazias
         value1[0] = '\0';
         value2[0] = '\0';
+    }
+}
+
+int l_size(char* input){
+
+    if(input != NULL){
+    int i = 0;
+    char c = i;
+    while( input[i] != '\0'){
+        //printf("valor de i: %c\n", input[i]);
+        i++;
+    }
+
+    return i;
     }
 }
 
@@ -182,8 +219,13 @@ int main() {
         // Procura pela palavra "jumpI" na linha atual
         else if (strstr(linha, "jumpI") != NULL) {
 
-            char alvo1[20], alvo2[20];
-            extractValues(linha, alvo1, alvo2);
+            char alvo1[20]; 
+            //printf("%s\n", alvo1);
+            
+            //extrair_destino2(linha, alvo1);
+            //alvo1 = extrair_destino(linha);
+            strcpy(alvo1, extrair_destino(linha));
+
             appendDesvioToList(&Desvio_list, linha, numero_linha, alvo1, "");
 
             appendLeaderToList(&Leader_list, "", numero_linha+1);
@@ -218,14 +260,24 @@ int main() {
 
         printf("Procurando na linha %s se há o alvo 1 %s \n", linha, currentDesvio->alvo1);
 
-        if(strstr(currentDesvio->alvo1, linha) != NULL){
+        //if(strstr(linha[] , currentDesvio->alvo1) != NULL){
+        //strcmp(linha, currentDesvio->alvo1)
+
+        // printf("linha: %s\n", linha);
+        // printf("alvo: %s\n", currentDesvio->alvo1);
+        // printf("l_size: %d\n", l_size(currentDesvio->alvo1));
+        
+        printf("Procurando na linha: %s se há o alvo 1: %s \n", linha, currentDesvio->alvo1);
+        if(strncmp(linha, currentDesvio->alvo1, l_size(currentDesvio->alvo1)) == 0 )
+        {
             printf("encontrado alvo1! \n");
             appendLeaderToList(&Leader_list, linha, numero_linha);
         }
         
-        printf("Procurando na linha %s se há o alvo 2 %s \n", linha, currentDesvio->alvo2);
-        if(currentDesvio->alvo2 != ""){
-            if(strstr(currentDesvio->alvo2, linha) != NULL){
+        if(!(strcmp(currentDesvio->alvo2, "") == 0 )){
+            printf("Procurando na linha: %s se há o alvo 2: %s \n", linha, currentDesvio->alvo2);
+            if(strncmp(linha, currentDesvio->alvo2, l_size(currentDesvio->alvo2)) == 0 )
+            {
                 printf("encontrado alvo2! \n");
                 appendLeaderToList(&Leader_list, linha, numero_linha);
             }
@@ -247,9 +299,9 @@ int main() {
     Desvio* currentDesvio = Desvio_list;
     while (currentDesvio != NULL) {
         printf("%s", currentDesvio->value);
-        printf("alvo 1: %s\n", currentDesvio->alvo1);
-        printf("alvo 2: %s\n", currentDesvio->alvo2);
-        printf("linha: %d\n\n", currentDesvio->numero_linha);
+        printf("alvo 1:%s\n", currentDesvio->alvo1);
+        printf("alvo 2:%s\n", currentDesvio->alvo2);
+        printf("linha:%d\n", currentDesvio->numero_linha);
         currentDesvio = currentDesvio->next;
     }
     free(currentDesvio);
@@ -261,7 +313,7 @@ int main() {
     Leader* currentLeader = Leader_list;
     while (currentLeader != NULL) {
         printf("%s", currentLeader->value);
-        printf("linha: %d\n", currentLeader->numero_linha);
+        printf("linha:%d\n", currentLeader->numero_linha);
         currentLeader = currentLeader->next;
     }
     free(currentLeader);

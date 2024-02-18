@@ -4,7 +4,7 @@
 
 #define MAX_LINES 100  // Define o máximo de linhas no arquivo
 #define first_line 1
-
+int lastLineNumber;
 typedef struct Leader {
     char value[50];
     int numero_linha;
@@ -30,6 +30,8 @@ Leader* createLeader(const char* value, int numero_linha) {
     }
     return newLeader;
 }
+
+
 
 // Função para adicionar um novo valor à lista
 void appendLeaderToList(Leader** head, const char* value, int numero_linha) {
@@ -243,6 +245,8 @@ int main() {
 
     }
 
+    lastLineNumber = numero_linha;
+
     // Fecha o arquivo
     //    fclose(arquivo);
 
@@ -252,41 +256,41 @@ int main() {
     // Lê linha por linha até o final do arquivo para avaliar os ALVOS! Os líderes após desvios já foram definidos.
     while (fgets(linha, sizeof(linha), arquivo)){
 
-    numero_linha++;
+        numero_linha++;
 
-    //Procura na lista de desvios se há algum que possua o alvo da linha atual
-    Desvio* currentDesvio = Desvio_list;
-    while (currentDesvio != NULL) {
+        //Procura na lista de desvios se há algum que possua o alvo da linha atual
+        Desvio* currentDesvio = Desvio_list;
+        while (currentDesvio != NULL) {
 
-        printf("Procurando na linha %s se há o alvo 1 %s \n", linha, currentDesvio->alvo1);
+            printf("Procurando na linha %s se há o alvo 1 %s \n", linha, currentDesvio->alvo1);
 
-        //if(strstr(linha[] , currentDesvio->alvo1) != NULL){
-        //strcmp(linha, currentDesvio->alvo1)
+            //if(strstr(linha[] , currentDesvio->alvo1) != NULL){
+            //strcmp(linha, currentDesvio->alvo1)
 
-        // printf("linha: %s\n", linha);
-        // printf("alvo: %s\n", currentDesvio->alvo1);
-        // printf("l_size: %d\n", l_size(currentDesvio->alvo1));
-        
-        printf("Procurando na linha: %s se há o alvo 1: %s \n", linha, currentDesvio->alvo1);
-        if(strncmp(linha, currentDesvio->alvo1, l_size(currentDesvio->alvo1)) == 0 )
-        {
-            printf("encontrado alvo1! \n");
-            appendLeaderToList(&Leader_list, linha, numero_linha);
-        }
-        
-        if(!(strcmp(currentDesvio->alvo2, "") == 0 )){
-            printf("Procurando na linha: %s se há o alvo 2: %s \n", linha, currentDesvio->alvo2);
-            if(strncmp(linha, currentDesvio->alvo2, l_size(currentDesvio->alvo2)) == 0 )
+            // printf("linha: %s\n", linha);
+            // printf("alvo: %s\n", currentDesvio->alvo1);
+            // printf("l_size: %d\n", l_size(currentDesvio->alvo1));
+            
+            printf("Procurando na linha: %s se há o alvo 1: %s \n", linha, currentDesvio->alvo1);
+            if(strncmp(linha, currentDesvio->alvo1, l_size(currentDesvio->alvo1)) == 0 )
             {
-                printf("encontrado alvo2! \n");
+                printf("encontrado alvo1! \n");
                 appendLeaderToList(&Leader_list, linha, numero_linha);
             }
+            
+            if(!(strcmp(currentDesvio->alvo2, "") == 0 )){
+                printf("Procurando na linha: %s se há o alvo 2: %s \n", linha, currentDesvio->alvo2);
+                if(strncmp(linha, currentDesvio->alvo2, l_size(currentDesvio->alvo2)) == 0 )
+                {
+                    printf("encontrado alvo2! \n");
+                    appendLeaderToList(&Leader_list, linha, numero_linha);
+                }
+            }
+
+            currentDesvio = currentDesvio->next;
         }
 
-        currentDesvio = currentDesvio->next;
-    }
-
-    free(currentDesvio);
+        free(currentDesvio);
 
     }
 
@@ -317,6 +321,45 @@ int main() {
         currentLeader = currentLeader->next;
     }
     free(currentLeader);
+
+
+
+// número da linha da instrução líder,
+// seguido de um traço,
+// terminado pelo número da linha da última instrução do bloco básico
+    
+    printf("Blocos basicos:\n");
+    int number_block = 1;
+    Leader* currentLeader2 = Leader_list;
+    while(currentLeader2 != NULL){
+
+        printf("Bloco basico %d\n", number_block);
+        printf("%d -", currentLeader2->numero_linha);
+    
+        if(currentLeader2->next !=NULL){
+        printf(" %d\n", currentLeader2->next->numero_linha-1);
+
+        }
+        else{
+            printf("%d\n", lastLineNumber);
+        }
+
+        currentLeader2 = currentLeader2->next;
+        number_block++;
+    }
+
+
+// digraph nome {
+//      a -> b -> c;
+//      b -> d;
+//  }
+
+//     ARQUIVO_SAIDA='out.dot'
+//     FILE *foutput = fopen(ARQUIVO_SAIDA, "w+");
+
+//     fprintf(foutput, "digraph grafo {\n");
+//     fprintf(foutput, "label=\"Ref\";\n");
+    
 
     return 0;
 }

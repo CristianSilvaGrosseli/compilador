@@ -1,3 +1,8 @@
+// Entrega 7
+// Cristian Silva Grosseli - 00243693
+// Iuri Mendonça Tinti - 00278043
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -324,42 +329,34 @@ int main() {
 
 
 
-// número da linha da instrução líder,
-// seguido de um traço,
-// terminado pelo número da linha da última instrução do bloco básico
-    
-    printf("Blocos basicos:\n");
-    int number_block = 1;
-    Leader* currentLeader2 = Leader_list;
-    while(currentLeader2 != NULL){
+    // número da linha da instrução líder,
+    // seguido de um traço,
+    // terminado pelo número da linha da última instrução do bloco básico
+    FILE *foutput = fopen("CFD", "w+");
+    Leader* currentLeaderGraphic = Leader_list;
+    fprintf(foutput, "digraph grafo {\n");
+    fprintf(foutput, "label=\"Ref\";\n");
+    while(currentLeaderGraphic != NULL)
+    {
+        Leader* next_leader = currentLeaderGraphic->next;
 
-        printf("Bloco basico %d\n", number_block);
-        printf("%d -", currentLeader2->numero_linha);
-    
-        if(currentLeader2->next !=NULL){
-        printf(" %d\n", currentLeader2->next->numero_linha-1);
-
+        int block_init_line = currentLeaderGraphic->numero_linha;
+        int block_end_line;
+        if (next_leader)
+        {
+            block_end_line = next_leader->numero_linha;
         }
-        else{
-            printf("%d\n", lastLineNumber);
+        else
+        {
+            block_end_line = lastLineNumber;
         }
 
-        currentLeader2 = currentLeader2->next;
-        number_block++;
+        fprintf(foutput, "  %d -> %d;\n", block_init_line, block_end_line);
+
+        currentLeaderGraphic = currentLeaderGraphic->next;
     }
-
-
-// digraph nome {
-//      a -> b -> c;
-//      b -> d;
-//  }
-
-//     ARQUIVO_SAIDA='out.dot'
-//     FILE *foutput = fopen(ARQUIVO_SAIDA, "w+");
-
-//     fprintf(foutput, "digraph grafo {\n");
-//     fprintf(foutput, "label=\"Ref\";\n");
-    
+    fprintf(foutput, "}\n");
+    fclose(foutput);
 
     return 0;
 }

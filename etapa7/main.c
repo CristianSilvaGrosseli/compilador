@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "iloc.h"
+#include "encontra_lider.c"
 
 extern int yyparse(void);
 extern int yylex_destroy(void);
@@ -11,6 +12,6 @@ int main (int argc, char **argv)
   int ret = yyparse();
   //exporta (arvore);
   yylex_destroy();
-  printIlocOperations();
+  printLeaderGraphviz();
   return ret;
 }

@@ -61,4 +61,5 @@ void add_label_operation(int label);
 void add_jump_i_operation(int label);
 
 void printIlocOperations();
+void writeIlocOperation();
 

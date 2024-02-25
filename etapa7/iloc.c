@@ -199,3 +199,66 @@ void printIlocOperations()
         current = current->next_operation;
     }
 }
+
+void writeIlocOperation()
+{
+    FILE *foutput = fopen("input.txt", "w+");
+
+    IlocOperationList* current =  g_IlocOperations;
+    while (current != NULL)
+    {
+        IlocOperation* operation = current->operation;
+        char* mnemonico = operation->mnemonico;
+        if (strcmp(mnemonico, "storeAI") == 0)
+        {
+            // storeAI r1 => r2, c3 // Memoria(r2 + c3) = r1
+            fprintf(foutput, "%s %s => %s, %s\n", operation->mnemonico, operation->campo_1, operation->campo_2, operation->campo_3);
+        }
+        else if (strcmp(mnemonico, "loadAI") == 0)
+        {
+            // loadAI r1, c2 => r3 // r3 = Memoria(r1 + c2)
+            fprintf(foutput, "%s %s, %s => %s\n", operation->mnemonico, operation->campo_2, operation->campo_3, operation->campo_1);
+        }
+        else if (strcmp(mnemonico, "loadI") == 0)
+        {
+            // loadI c1 => r2 // r2 = c1
+            fprintf(foutput, "%s %s => %s\n", operation->mnemonico, operation->campo_1, operation->campo_2);
+        }
+        else if (strcmp(mnemonico, "label") == 0)
+        {
+            // label
+            fprintf(foutput, "%s:\n", operation->campo_3);
+        }
+        else if (strcmp(mnemonico, "cbr") == 0)
+        {
+            // cbr r1 -> l2, l3 // PC = endereço(l2) se r1 = true, senão PC = endereço(l3)
+            fprintf(foutput, "%s %s => %s, %s\n", operation->mnemonico, operation->campo_3, operation->campo_1, operation->campo_2);
+        }
+        else if (strcmp(mnemonico, "jumpI") == 0)
+        {
+            // jumpI -> l1 // PC = endereço(l1)
+            fprintf(foutput, "%s => %s\n", operation->mnemonico, operation->campo_3);
+        }
+        else if (
+            strcmp(mnemonico, "add") == 0 ||
+            strcmp(mnemonico, "sub") == 0 ||
+            strcmp(mnemonico, "mult") == 0 ||
+            strcmp(mnemonico, "div") == 0 ||
+            strcmp(mnemonico, "cmp_EQ") == 0 ||
+            strcmp(mnemonico, "cmp_NE") == 0 ||
+            strcmp(mnemonico, "cmp_GE") == 0 ||
+            strcmp(mnemonico, "cmp_LE") == 0 ||
+            strcmp(mnemonico, "cmp_GT") == 0 ||
+            strcmp(mnemonico, "cmp_LT") == 0 ||
+            strcmp(mnemonico, "and") == 0 ||
+            strcmp(mnemonico, "or") == 0
+        )
+        {
+            fprintf(foutput, "%s %s, %s => %s\n", operation->mnemonico, operation->campo_1, operation->campo_2, operation->campo_3);
+        }
+
+        current = current->next_operation;
+    }
+
+    fclose(foutput);
+}

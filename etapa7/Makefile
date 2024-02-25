@@ -14,4 +14,4 @@ clean:
 	rm -rf lex.yy.* parser.tab.* main.o tad_ast.o table.o iloc.o etapa7 *.dot
 
 entrega:
-	tar cvzf etapa7.tgz helpers.h tad_ast.c tad_ast.h table.c table.h iloc.c iloc.h main.c Makefile parser.y scanner.l
+	tar cvzf etapa7.tgz helpers.h tad_ast.c tad_ast.h table.c table.h iloc.c iloc.h main.c encontra_lider.c Makefile parser.y scanner.l

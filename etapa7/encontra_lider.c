@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "iloc.h"
 
 #define MAX_LINES 100  // Define o máximo de linhas no arquivo
 #define first_line 1
@@ -183,7 +184,9 @@ int l_size(char* input){
 }
 
 
-int main() {
+int printLeaderGraphviz() {
+    writeIlocOperation();
+
     FILE *arquivo;
     char linha[1000];
     
@@ -332,7 +335,7 @@ int main() {
     // número da linha da instrução líder,
     // seguido de um traço,
     // terminado pelo número da linha da última instrução do bloco básico
-    FILE *foutput = fopen("CFD", "w+");
+    FILE *foutput = fopen("CFD.dot", "w+");
     Leader* currentLeaderGraphic = Leader_list;
     fprintf(foutput, "digraph grafo {\n");
     fprintf(foutput, "label=\"Ref\";\n");
@@ -344,7 +347,7 @@ int main() {
         int block_end_line;
         if (next_leader)
         {
-            block_end_line = next_leader->numero_linha;
+            block_end_line = next_leader->numero_linha - 1;
         }
         else
         {

@@ -244,9 +244,20 @@ void printAssemblyInstructions()
             IlocOperationList* next = current->next_operation;
             if (next != NULL)
             {
-                printf("movl\t%%edx, -%s(%%%s)\n", next->operation->campo_3, next->operation->campo_2);
+                printf("movl\t%%edx, %s(%%%s)\n", next->operation->campo_3, next->operation->campo_2);
             }
             current = current->next_operation;
+        }
+        else if (strcmp(instruction_mnemonic, "label") == 0)
+        {
+            printf("%s\n", current->operation->campo_3);
+        }
+        else if (strcmp(instruction_mnemonic, "cbr") == 0){
+            printf("%s %s => %s, %s\n", instruction_mnemonic, current->operation->campo_3, current->operation->campo_1, current->operation->campo_2);
+        }
+        else if (strcmp(instruction_mnemonic, "jumpI") == 0)
+        {
+            printf("%s => %s\n", instruction_mnemonic, current->operation->campo_3);
         }
         current = current->next_operation;
     }

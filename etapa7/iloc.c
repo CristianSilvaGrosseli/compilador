@@ -140,6 +140,7 @@ IlocOperationList* custom_instruction_operation(char* instruction_name, int para
 void printIlocOperation(IlocOperation* operation)
 {
     char* mnemonico = operation->mnemonico;
+    printf("ID: %d", operation->id);
     if (strcmp(mnemonico, "storeAI") == 0)
     {
         // storeAI r1 => r2, c3 // Memoria(r2 + c3) = r1
@@ -188,6 +189,10 @@ void printIlocOperation(IlocOperation* operation)
         printf("%s %s, %s => %s", operation->mnemonico, operation->campo_1, operation->campo_2, operation->campo_3);
     }
     printf("\n");
+}
+
+IlocOperationList* get_iloc_list(){
+    return g_IlocOperations;
 }
 
 void printIlocOperations()

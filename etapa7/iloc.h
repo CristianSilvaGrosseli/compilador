@@ -22,6 +22,8 @@ typedef struct IlocOperation
     char* campo_1;
     char* campo_2;
     char* campo_3;
+    int id;
+    int isLeader;
 
 } IlocOperation;
 
@@ -62,4 +64,5 @@ void add_jump_i_operation(int label);
 
 void printIlocOperations();
 void writeIlocOperation();
+IlocOperationList* get_iloc_list();
 
